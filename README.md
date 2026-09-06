@@ -2,6 +2,14 @@
 
 Comprehensive question bank for JLPT N1 exam preparation, with past exam questions organized by type, year, and theme.
 
+## Mission (repo定位)
+
+这是一个**超长线任务 repo**：
+
+1. **时间跨度**：从现在开始，持续到今年 12 月的 JLPT N1 考试，甚至更久 —— 直到用户通过 N1 考试为止。repo 内容随时间滚动积累。
+2. **内容来源**：用户自行手动录入内容（仅限可手工输入的内容，如题干、选项、答案、解析、笔记等）。Agent 不替他编造真题内容。
+3. **质量保障**：Agent 应积极与互联网资源比照校对，审阅用户录入的内容 —— 核对真题原文、答案对错、出处年份/题号、解析准确性等，并将校对结果反馈给用户。
+
 ## Exam Structure (試験構成)
 
 ### 言語知識 (Language Knowledge) - 110分
@@ -36,7 +44,7 @@ Comprehensive question bank for JLPT N1 exam preparation, with past exam questio
 
 ```
 jlpt-n1-question-bank/
-├── past-exams/          # 按年份整理的真題
+├── past-exams/          # 按年份整理的真题（用户手动录入，Agent 校对）
 │   ├── 2010/           # 2010年7月・12月
 │   ├── 2012/           # 2012年7月・12月
 │   ├── ...
