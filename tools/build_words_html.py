@@ -36,20 +36,32 @@ def render(lines):
     word_idx = 0
     q_idx = 0
     cur = None
+    open_detail = False
+
+    def close_card():
+        nonlocal open_detail
+        if open_detail:
+            body.append("</div></details>")
+            open_detail = False
+
     for raw in lines:
         line = raw.rstrip()
         if not line.strip():
             continue
         if line.startswith("# "):
+            close_card()
             body.append(f'<h1>{esc(line[2:])}</h1>')
             continue
         if line.startswith("> "):
+            close_card()
             body.append(f'<p class="note">{fmt_inline(line[2:])}</p>')
             continue
         if line == "---":
+            close_card()
             body.append('<div class="hr"></div>')
             continue
         if line.startswith("## "):
+            close_card()
             title = line[3:]
             if title.startswith(("题干速览", "干扰项一览", "干扰项")):
                 body.append(f'<h2 class="sec">{esc(title)}</h2>')
@@ -59,6 +71,7 @@ def render(lines):
                             f' <a class="qanchor" href="#q{q_idx}">#q{q_idx}</a></h2>')
             continue
         if line.startswith("### "):
+            close_card()
             t = line[4:]
             if t.startswith("【干扰项】"):
                 body.append('<div class="dist-h">⚑ 干扰项 查缺补漏（假名选项对应之真实汉字词）</div>')
@@ -77,6 +90,7 @@ def render(lines):
                 f'{"<span class=\"wy\">" + esc(yomi) + "</span>" if yomi else ""}'
                 f'{"<span class=\"tag\">干扰项</span>" if is_dist else ""}'
                 f'</summary><div class="cbody">')
+            open_detail = True
             cur = body
             continue
         if cur is None:
@@ -130,6 +144,7 @@ def render(lines):
                 cur.append(f'<p>{fmt_inline(m.group(2))}</p>')
             continue
         cur.append(f'<p>{fmt_inline(line)}</p>')
+    close_card()
     return body, cards, dist
 
 
