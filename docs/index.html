@@ -124,7 +124,7 @@ border-radius:50%;animation:sp 0.7s linear infinite;vertical-align:-2px;margin-r
 const SECTION_LABEL={vocab:'語彙',grammar:'文法',reading:'読解',listening:'聴解'};
 const SECTION_COLOR={vocab:'#e8590c',grammar:'#2f9e44',reading:'#1971c2',listening:'#e03131'};
 const TYPEMAP={
- 'vocab-context':'文脈規定(語彙)','vocab-paraphrase':'言い換え','vocab-usage':'語彙用法',
+ 'vocab-reading':'読み方(文字)','vocab-context':'文脈規定(語彙)','vocab-paraphrase':'言い換え','vocab-usage':'語彙用法',
  'grammar-usage':'文脈規定(文法)','grammar-choice':'文法選択','grammar-composition':'文の並べ替え',
  'reading-short':'短文読解','reading-mid':'中文読解','reading-long':'長文読解',
  'listening-point':'課題理解','listening-grammar':'要点理解','listening-overview':'概要理解',
@@ -214,15 +214,18 @@ function buildUI(){
   render();
 }
 
-function letters(i){return String.fromCharCode(65+i);}
+function ansIndex(a){a=String(a||'').toUpperCase();
+ if(/^[1-4]$/.test(a))return Number(a)-1;
+ if(/^[A-D]$/.test(a))return a.charCodeAt(0)-65;return -1;}
+function keyLabel(i){return String(i+1);}
 
 function card(q,idx){
   const src=`${q.year}年${q.month}月 · ${SECTION_LABEL[q.section]||q.section} · ${TYPEMAP[q.section+'-'+q.type]||q.type} · 第${q.number}題`;
   const d=DIFF[q.difficulty]||DIFF.medium;
   const tags=(q.tags||[]).map(t=>`<span>#${t}</span>`).join('');
   const opts=(q.options||['','','','']).map((o,i)=>
-    `<div class="opt" data-i="${i}" data-ok="${q.answer==letters(i)?1:0}">`+
-    `<span class="k">${letters(i)}</span><span class="tx">${o||''}</span></div>`).join('');
+    `<div class="opt" data-i="${i}" data-ok="${ansIndex(q.answer)===i?1:0}">`+
+    `<span class="k">${keyLabel(i)}</span><span class="tx">${o||''}</span></div>`).join('');
   const div=document.createElement('div');
   div.className='qcard';
   div.style.setProperty('--c',SECTION_COLOR[q.section]||'#7a4ff7');
