@@ -1,0 +1,16 @@
+{
+  "id": "YYYY-MM-section-type-NN",
+  "year": 0,
+  "month": 0,
+  "section": "vocab|grammar|reading|listening",
+  "type": "context|paraphrase|usage|choice|composition|short|mid|long|point|grammar|overview|detailed|implication",
+  "number": 0,
+  "question": "",
+  "options": ["", "", "", ""],
+  "answer": "",
+  "explanation": "",
+  "difficulty": "easy|medium|hard",
+  "tags": [],
+  "source": "JLPT N1 YYYY年MM月",
+  "notes": ""
+}
