@@ -25,3 +25,13 @@ Thumbs.db
 *.tmp
 *.bak
 *.log
+
+# Plaintext question content — NEVER commit (copyright). Encrypted site only.
+past-exams/**/*.json
+question-bank/by-type/**/*.json
+question-bank/by-year/**/*.json
+question-bank/by-theme/**/*.json
+!question-bank/template.json
+
+# Local secrets / generated artifacts
+docs/.secret.txt

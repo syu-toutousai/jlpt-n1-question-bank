@@ -44,12 +44,12 @@ Comprehensive question bank for JLPT N1 exam preparation, with past exam questio
 
 ```
 jlpt-n1-question-bank/
-├── past-exams/          # 按年份整理的真题（用户手动录入，Agent 校对）
+├── past-exams/          # 按年份整理的真题（用户手动录入，Agent 校对）【明文·仅本地】
 │   ├── 2010/           # 2010年7月・12月
 │   ├── 2012/           # 2012年7月・12月
 │   ├── ...
 │   └── 2025/           # 2025年7月
-├── question-bank/       # 按題型分類的題庫
+├── question-bank/       # 按題型分類的題庫【明文·仅本地】
 │   ├── by-type/         # 縱向整理（按題型）
 │   │   ├── vocab-context/
 │   │   ├── vocab-paraphrase/
@@ -67,6 +67,10 @@ jlpt-n1-question-bank/
 │   │   └── listening-implication/
 │   ├── by-year/          # 橫向整理（按年份）
 │   └── by-theme/         # 按主題分類（語法・詞彙等）
+├── docs/                 # 加密后的 Pages 站点（唯一可推送内容）
+│   ├── index.html       # 密码门 + 题库阅读站（WebCrypto AES-GCM 解密）
+│   ├── data.json        # 题目密文（AES-256-GCM，PBKDF2-SHA256 310000 次派生）
+│   └── index-meta.json  # 非敏感统计（收录年份/题数）
 ├── analysis/             # 分析與統計
 ├── guides/               # 備考指南
 └── tools/                # 工具腳本
@@ -91,6 +95,28 @@ ls past-exams/2024/
 # 練習所有「語法」相關題目
 ls question-bank/by-theme/grammar/
 ```
+
+## GitHub Pages (加密展示)
+
+站点：https://syu-toutousai.github.io/jlpt-n1-question-bank/
+
+**版权保护方案**（客户端 AES 加密）：
+- 明文题目 JSON **仅存本地**（已被 `.gitignore` 忽略，永不入库）
+- `python3 tools/encrypt.py` 将所有题目打包并 AES-256-GCM 加密（密钥由密码经 PBKDF2-SHA256 派生），写入 `docs/data.json`
+- 浏览器端无需任何服务：`docs/index.html` 输入密码后在 WebCrypto 中解密渲染
+- 无密码者只能看到密文，无法读取题目原文（版权内容真实不可读）
+
+**访问密码**：`docs/.secret.txt`（本地文件，已在 `.gitignore` 中，不入库）
+每次录入新题后进行两个步骤：
+
+```bash
+git add past-exams/  question-bank/   # 明文仅在本地版本库管理（可选）
+python3 tools/encrypt.py              # 重新加密，更新 docs/
+git add docs/
+git commit && git push                # 只推送加密后的 docs/
+```
+
+> ⚠️ 明文 JSON 被 `.gitignore` 排除，不会进入 GitHub 仓库。若确需把明文题目纳入版本管理，请使用本地 git 分支或外部备份，绝不可推送到公共仓库。
 
 ## File Format (JSON)
 

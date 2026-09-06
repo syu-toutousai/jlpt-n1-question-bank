@@ -61,7 +61,44 @@ Whenever the user has entered content (a question, answer key, passage, etc.), y
 - When committing, keep messages focused: e.g. `Add 2024年12月 vocab questions`, `Fix answer key: 2021-12 grammar Q3 (C -> B)`.
 - Review changes before committing; never commit secrets or unrelated files.
 
-## 5. Default Structure Conventions
+## 5. GitHub Pages & Encryption (加密部署)
+
+The Pages site (https://syu-toutousai.github.io/jlpt-n1-question-bank/) is the
+only public face of this repo, and it is **password-protected via client-side
+AES-256-GCM encryption** (copyright reasons). Follow these rules strictly:
+
+### Do NOT push plaintext question content, EVER
+
+- Plaintext question JSONs under `past-exams/`, `question-bank/` are
+  **gitignored on purpose**. They must **never** be committed or pushed.
+- The only pushable content is the encrypted site under `docs/` plus
+  tooling/documentation (`tools/`, README, templates, `.gitkeep`s,
+  non-sensitive metadata without question text).
+- Verify with `git status` / `git ls-files` that no `*.json` under
+  `past-exams/` or `question-bank/` is staged before any push.
+
+### Regenerate the encrypted site after content changes
+
+As soon as the user has entered/verified any question content, regenerate:
+
+```bash
+python3 tools/encrypt.py          # re-encrypts into docs/ (reuses stored password)
+git add docs/ && git commit && git push   # push only encrypted artifacts
+```
+
+- `docs/.secret.txt` holds the password locally and is gitignored — never push it.
+- Password lives only with the user; to change it:
+  `python3 tools/encrypt.py --password 'NEW_PASSWORD'`.
+
+### Verification notes
+
+- After each encrypt run, round-trip can be re-verified in Node (WebCrypto,
+  same API as browser): decrypt `docs/data.json` with the password and confirm
+  the expected questions/answers come back; confirm a wrong password is rejected.
+- `data.json` contains ciphertext only; `index-meta.json` contains only
+  non-sensitive counts (total / years / sections) for the landing header.
+
+## 6. Default Structure Conventions
 
 - One JSON file per question (see `question-bank/template.json`).
 - `past-exams/<year>/<section>/` — original entries by year.
