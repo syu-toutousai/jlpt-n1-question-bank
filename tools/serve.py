@@ -160,16 +160,53 @@ def pick_port(preferred: int) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Local transparent dev server")
     parser.add_argument("--port", type=int, default=8123, help="preferred port (default 8123, auto-bumps if busy)")
+    parser.add_argument("--daemon", action="store_true",
+                        help="run in background as a real daemon (double-fork, detached; use --stop to kill)")
+    parser.add_argument("--stop", action="store_true", help="stop the running daemon by its pidfile")
     args = parser.parse_args()
 
+    pidfile = Path(os.environ.get("JLPT_QB_PIDFILE", "/tmp/jlpt-qb-serve.pid"))
+    if args.stop:
+        if not pidfile.exists():
+            print("no daemon running (pidfile not found)")
+            return 1
+        pid = int(pidfile.read_text().strip())
+        try:
+            os.kill(pid, 15)
+            print(f"sent SIGTERM to daemon {pid}")
+        except ProcessLookupError:
+            print(f"daemon {pid} already gone")
+        pidfile.unlink(missing_ok=True)
+        return 0
+
     port = pick_port(args.port)
+    if not args.daemon:
+        server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+        url = f"http://127.0.0.1:{port}/"
+        print(f"Serving {ROOT} at {url}  (Ctrl+C to stop)")
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
+        return 0
+
+    # daemonize: double-fork so the grandchild is reparented away from the
+    # launching shell and survives regardless of how the shell exits.
+    pid = os.fork()
+    if pid > 0:
+        os._exit(0)
+    os.setsid()
+    pid = os.fork()
+    if pid > 0:
+        os._exit(0)
+    logf = open("/tmp/jlpt-qb-serve.log", "ab", buffering=0)
+    os.dup2(logf.fileno(), 0)
+    os.dup2(logf.fileno(), 1)
+    os.dup2(logf.fileno(), 2)
+    pidfile.write_text(str(os.getpid()))
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    url = f"http://127.0.0.1:{port}/"
-    print(f"Serving {ROOT} at {url}  (Ctrl+C to stop)")
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        pass
+    print(f"[daemon {os.getpid()}] Serving {ROOT} at http://127.0.0.1:{port}/", flush=True)
+    server.serve_forever()
     return 0
 
 
