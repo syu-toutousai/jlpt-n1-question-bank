@@ -1,0 +1,16 @@
+{
+  "id": "2024-12-vocab-context-01",
+  "year": 2024,
+  "month": 12,
+  "section": "vocab",
+  "type": "context",
+  "number": 1,
+  "question": "この商品は、品質が良いと＿＿＿からか、売れ行きが良い。",
+  "options": ["評判", "関心", "期待", "信頼"],
+  "answer": "A",
+  "explanation": "「評判」は世間的な評価や噂を意味し、品質が良いという評判が立っているという文脈に合う。",
+  "difficulty": "medium",
+  "tags": ["評判", "名詞", "売れ行き"],
+  "source": "JLPT N1 2024年12月",
+  "notes": ""
+}

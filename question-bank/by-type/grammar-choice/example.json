@@ -1,0 +1,21 @@
+{
+  "id": "2024-12-grammar-choice-01",
+  "year": 2024,
+  "month": 12,
+  "section": "grammar",
+  "type": "choice",
+  "number": 1,
+  "question": "事故の原因について、調査＿＿＿ことになった。",
+  "options": [
+    "の結果",
+    "する次第で",
+    "した後で",
+    "をめぐって"
+  ],
+  "answer": "B",
+  "explanation": "「次第で」は「事情により結果が変わる」を意味し、調査の結果によって方針を決めるという文脈に合う。",
+  "difficulty": "hard",
+  "tags": ["次第で", "文法パターン"],
+  "source": "JLPT N1 2024年12月",
+  "notes": ""
+}
