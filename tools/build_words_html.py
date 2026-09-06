@@ -34,6 +34,7 @@ def render(lines):
     cards = 0
     dist = 0
     word_idx = 0
+    q_idx = 0
     cur = None
     for raw in lines:
         line = raw.rstrip()
@@ -49,7 +50,13 @@ def render(lines):
             body.append('<div class="hr"></div>')
             continue
         if line.startswith("## "):
-            body.append(f'<h2 class="sec">{esc(line[3:])}</h2>')
+            title = line[3:]
+            if title.startswith(("题干速览", "干扰项一览", "干扰项")):
+                body.append(f'<h2 class="sec">{esc(title)}</h2>')
+            else:
+                q_idx += 1
+                body.append(f'<h2 class="sec" id="q{q_idx}">{esc(title)}'
+                            f' <a class="qanchor" href="#q{q_idx}">#q{q_idx}</a></h2>')
             continue
         if line.startswith("### "):
             t = line[4:]
@@ -65,7 +72,7 @@ def render(lines):
             if is_dist:
                 dist += 1
             body.append(
-                f'<details class="card" id="w{word_idx}" data-w="{esc(word)}"><summary>'
+                f'<details class="card" id="w-{esc(word)}" data-w="{esc(word)}"><summary>'
                 f'<span class="wn">{esc(word)}</span>'
                 f'{"<span class=\"wy\">" + esc(yomi) + "</span>" if yomi else ""}'
                 f'{"<span class=\"tag\">干扰项</span>" if is_dist else ""}'
@@ -147,6 +154,9 @@ header .tags span{{display:inline-block;background:rgba(255,255,255,.22);border-
 main{{max-width:960px;margin:-14px auto 40px;padding:0 16px}}
 .note{{background:var(--acc2);border-left:3px solid var(--acc);border-radius:10px;padding:10px 14px;font-size:13px;color:#38405a;margin:14px 0}}
 h2.sec{{background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(30,40,90,.08);padding:16px 20px;margin:22px 0 14px;font-size:16px;color:#33418f;border-left:5px solid var(--c);word-break:break-all}}
+.qanchor{{font-size:12px;color:#a8aebc;font-weight:600;text-decoration:none;margin-left:8px}}
+.qanchor:hover{{color:var(--acc)}}
+details.card{{scroll-margin-top:64px}}
 .dist-h{{background:#fff8f2;border:1.5px solid var(--warn);color:#c2410c;border-radius:12px;padding:9px 16px;margin:16px 0;font-size:13px;font-weight:700}}
 details.card{{background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(30,40,90,.08);margin:12px 0;border:1.5px solid var(--line);overflow:hidden}}
 details.card>summary{{list-style:none;cursor:pointer;padding:14px 18px;font-size:16.5px;font-weight:700;display:flex;align-items:baseline;gap:12px}}

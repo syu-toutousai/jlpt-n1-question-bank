@@ -58,6 +58,12 @@ display:flex;align-items:center;justify-content:center;font-size:12px;font-weigh
 line-height:1.8;color:#38405a;border-left:3px solid var(--acc)}
 .explain b{color:var(--acc)}
 .explain.show{display:block}
+.extw{color:var(--warn)!important;font-weight:700;border-bottom:1.5px dashed var(--warn);text-decoration:none;cursor:pointer}
+.extw:hover{background:#fff8f2}
+.extm{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ext{color:#fff;background:var(--c)!important;border-radius:99px;padding:3px 14px;font-size:11.5px;font-weight:700;
+text-decoration:none;border:1.5px solid var(--c);transition:.15s;white-space:nowrap}
+.ext:hover{opacity:.85}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .tags span{background:#f0f1f7;color:var(--sub);border-radius:99px;padding:2px 10px;font-size:11.5px}
 .empty{padding:60px 20px;text-align:center;color:var(--sub)}
@@ -221,6 +227,8 @@ function card(q){
   const src=`${q.year}年${q.month}月 · ${SECTION_LABEL[q.section]||q.section} · ${TYPEMAP[q.section+'-'+q.type]||q.type} · 第${q.number}題`;
   const d=DIFF[q.difficulty]||DIFF.medium;
   const tags=(q.tags||[]).map(t=>`<span>#${t}</span>`).join('');
+  const isMat= q.year===2024 && q.month===7 && q.section==='vocab' && q.type==='reading' && [1,2,3,4,5,6].indexOf(Number(q.number))>-1;
+  const ext= isMat?`<a class="ext" href="docs/vocab-words.html#q${q.number}" target="_blank" title="跳转到对应小问的学习材料">📖 扩展</a>`:'';
   const opts=(q.options||[]).map((o,i)=>
     `<div class="opt" data-i="${i}" data-ok="${ansIndex(q.answer)===i?1:0}">`+
     `<span class="k">${i+1}</span><span class="tx">${o||''}</span></div>`).join('');
@@ -230,8 +238,8 @@ function card(q){
     `<div class="qsrc"><span class="badge">${src}</span>`+
     `<span class="badge ${d[0]}">难度·${d[1]}</span>`+
     (q.verified?`<span class="badge" style="background:#e3fae9;color:#1f7a43">${q.verified.status==='matched'?'✅已校':'⚠'+q.verified.status}</span>`:'')+
-    `</div>`+
-    `<div class="qtext">${targetHtml(q.question,q.target)}</div>`+
+    `<span class="extm">${ext}</span></div>`+
+    `<div class="qtext">${targetHtml(q.question,q.target,isMat)}</div>`+
     `<div class="opts">${opts}</div>`+
     `<div class="explain"><b>答案 ${q.answer||'?'}</b>　${escapeHtml(q.explanation||'')}</div>`+
     (tags?`<div class="tags">${tags}</div>`:'')+
@@ -254,11 +262,12 @@ function card(q){
 
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-function targetHtml(text,target){
+function targetHtml(text,target,link){
   let s=escapeHtml(text||'');
   if(!target) return s;
   const t=escapeHtml(target);
   const r=new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  if(link) return s.replace(r, `<a class="extw" href="docs/vocab-words.html#w-${encodeURIComponent(target)}" target="_blank" title="查看词条卡片"><u>${t}</u></a>`);
   return s.replace(r, `<u>${t}</u>`);
 }
 
