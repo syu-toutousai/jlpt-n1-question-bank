@@ -37,6 +37,7 @@ padding:18px 20px;border-left:5px solid var(--c,#7a4ff7)}
 .badge{background:var(--acc2);color:var(--acc);border-radius:99px;padding:2px 10px;font-size:11.5px;font-weight:600}
 .badge.d0{background:#f6e9ff;color:#8b2ec4}.badge.d1{background:#fff1e3;color:#c2410c}.badge.d2{background:#ffe3e3;color:#c92a2a}
 .qtext{font-size:16px;line-height:1.9;margin-bottom:14px;white-space:pre-wrap}
+.qtext u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;text-decoration-color:#c92a2a;font-weight:700}
 .opts{display:flex;flex-direction:column;gap:8px}
 .opt{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:11px;border:1.5px solid var(--line);
 font-size:14.5px;line-height:1.7;cursor:pointer;transition:.12s;background:#fff}
@@ -232,7 +233,7 @@ function card(q,idx){
   div.innerHTML=
     `<div class="qsrc"><span class="badge">${src}</span>`+
     `<span class="badge ${d[0]}">难度·${d[1]}</span></div>`+
-    `<div class="qtext">${escapeHtml(q.question||'')}</div>`+
+    `<div class="qtext">${targetHtml(q.question,q.target)}</div>`+
     `<div class="opts">${opts}</div>`+
     `<div class="explain"><b>答案 ${q.answer||'?'}</b>　${escapeHtml(q.explanation||'')}</div>`+
     (tags?`<div class="tags">${tags}</div>`:'')+
@@ -258,6 +259,14 @@ function card(q,idx){
 }
 
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function targetHtml(text,target){
+  let s=escapeHtml(text||'');
+  if(!target) return s;
+  const t=escapeHtml(target);
+  const r=new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  return s.replace(r, `<u>${t}</u>`);
+}
 
 function render(){
   const list=QUESTIONS.filter(applyFilters);
