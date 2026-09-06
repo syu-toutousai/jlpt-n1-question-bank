@@ -55,6 +55,16 @@ Whenever the user has entered content (a question, answer key, passage, etc.), y
 - `webfetch`: fetch a concrete source page to confirm exact wording.
 - Note: JLPT does not officially publish past exams. Sources are typically scans of the real test shared by test-takers, study sites, or reputable prep materials. Prefer **multiple independent confirmations** for a mismatch before changing the user's entry.
 
+### Archiving sources (本地存档)
+
+Whenever a useful copyrighted source is found (exam PDF, answer-key scan, etc.):
+
+1. Save the file into **`refs/`** (gitignored, **never pushed**), name it
+   `YYYY-MM_科目_来源.ext` (e.g. `2024-12_vocab_hujiang.pdf`).
+2. Append one row to **`guides/source-log.md`** with: date, scope, source URL,
+   verification verdict, and the refs/ filename. (This file is safe to push.)
+3. If a link later dies, keep the row and mark the URL 「失效」.
+
 ## 4. Git/Commits
 
 - Commit only when the user explicitly asks.

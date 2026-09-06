@@ -35,3 +35,7 @@ question-bank/by-theme/**/*.json
 
 # Local secrets / generated artifacts
 docs/.secret.txt
+
+# Local-only reference archive (copyrighted PDFs / answer keys / scans) — NEVER push
+refs/*
+!refs/README.md
