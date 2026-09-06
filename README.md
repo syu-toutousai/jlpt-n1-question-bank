@@ -127,6 +127,19 @@ git commit && git push                # 只推送加密后的 docs/
 
 > ⚠️ 明文 JSON 被 `.gitignore` 排除，不会进入 GitHub 仓库。若确需把明文题目纳入版本管理，请使用本地 git 分支或外部备份，绝不可推送到公共仓库。
 
+## Local Dev Server (本地全量透明版)
+
+本地起一个不加密的、全量体现本 repo 的 web 前端（题库练习 / 统计 / 仓库浏览）：
+
+```bash
+python3 tools/serve.py --port 8123     # 端口占用则自动顺延
+# 打开 http://127.0.0.1:8123/
+```
+
+- 仅绑定 `127.0.0.1`；数据直接读取本地明文 JSON（`/api/questions`），与 Pages 加密版同源
+- 仓库浏览视图可预览 `analysis/` `guides/` `refs/` 等全部文本文件
+- 停服：`kill` 进程或前台 Ctrl+C
+
 ## File Format (JSON)
 
 Each question is stored in JSON format:
