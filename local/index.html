@@ -93,6 +93,7 @@ background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;mar
 <nav id="nav">
   <button class="on" data-v="bank">题库练习</button>
   <button data-v="stats">统计</button>
+  <button data-v="material">学习材料</button>
   <button data-v="files">仓库浏览</button>
 </nav>
 
@@ -117,6 +118,12 @@ background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;mar
 
   <div id="view-stats" class="view" style="display:none">
     <div class="panel" id="statsBox"></div>
+  </div>
+
+  <div id="view-material" class="view" style="display:none">
+    <div class="panel" style="padding:12px">
+      <iframe id="matFrame" src="docs/vocab-words.html" style="width:100%;min-height:78vh;border:0;border-radius:12px;background:#fff"></iframe>
+    </div>
   </div>
 
   <div id="view-files" class="view" style="display:none">

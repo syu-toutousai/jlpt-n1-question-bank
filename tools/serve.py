@@ -133,6 +133,16 @@ class Handler(BaseHTTPRequestHandler):
                 return
             self._json({"ok": True, "path": rel, "content": content})
             return
+        # static files (e.g. /docs/vocab-words.html on both local & Pages)
+        rel = path.lstrip("/")
+        if not rel or rel.startswith(".") or rel.startswith("/"):
+            self._json({"error": "not found"}, 404)
+            return
+        candidate = (ROOT / rel).resolve()
+        if candidate.is_relative_to(ROOT) and candidate.is_file() and candidate.name not in SKIP_FILES:
+            ctype = mimetypes.guess_type(candidate.name)[0] or "application/octet-stream"
+            self._send(200, candidate.read_bytes(), ctype + ("; charset=utf-8" if ctype.startswith("text/") else ""))
+            return
         self._json({"error": "not found"}, 404)
 
 

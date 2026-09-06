@@ -14,6 +14,8 @@
 | 2026-09-06 | 2024-07 N1 文法/読解 逐题 | https://passjapanese.com/en/jlpt/n1/exam/2024-07-grammar-reading | 在线参照（未存档） | - |
 | 2026-09-06 | 2024-07 N1 聴解 逐题 | https://passjapanese.com/en/jlpt/n1/exam/2024-07-listening | 在线参照（未存档） | - |
 | 2026-09-06 | 2024-07 N1 词汇/语法/读解答案（沪江） | https://jp.hujiang.com/nenglikaon1/p1439200/ 等 | 在线参照（未存档） | - |
+| 2026-09-06 | 学习材料语注生成：MOJi辞書（读音/释义/JLPT例句+TTS） | https://www.mojidict.com （本地 moji CLI 查询） | 逐词查询，用于生成 analysis/2024-07-vocab-reading-words.md | - |
+| 2026-09-06 | 学习材料例句生成：Nadeshiko 动漫/日剧台词库（含截图/音频 URL） | https://nadeshiko.co （本地 nadeshiko CLI 查询） | 每个词条取 SAFE 等级例句，示例见 guides 说明 | - |
 
 ## 结论标记
 
