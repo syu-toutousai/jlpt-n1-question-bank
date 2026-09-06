@@ -8,7 +8,12 @@
 
 | 日期 | 范围 | 来源 URL | 校对结论 | 本地文件 (refs/) |
 |------|------|----------|----------|------------------|
-| （待录入） | 例：2024年12月 語彙 | https://example.com/... | ✅ 与录入一致 | refs/2024-12_vocab_xxx.pdf |
+| 2026-09-06 | 2024年7月 N1 全部答案速查（词汇/语法/读解/听力） | https://www.diliushixian.com/information/4374.html | 参照（与羊驼有1处差异，见下） | refs/2024-07_answerkey_diliushixian.md |
+| 2026-09-06 | 2024年7月 N1 答案速查（羊驼） | https://www.youtibao.net/kaoshi/nxkalqgph3.html | 抓取失败，内容来自搜索摘要；题8应为4 | refs/2024-07_answerkey_youtibao.md |
+| 2026-09-06 | 2024年7月 N1 逐题题干+选项+答案+解析（笔试全95题+听力） | https://www.jlptzhen.com/n1%E7%9C%9F%E9%A2%98%E5%9C%A8%E7%BA%BF%E5%81%9A2024%E5%B9%B407%E6%9C%88%E6%97%A5%E6%9C%AC%E8%AF%AD%E8%83%BD%E5%8A%9B%E8%AF%95%E9%AA%8C/ | 录入时逐题对照的首选源 | refs/2024-07_jlptzhen_full.html |
+| 2026-09-06 | 2024-07 N1 文法/読解 逐题 | https://passjapanese.com/en/jlpt/n1/exam/2024-07-grammar-reading | 在线参照（未存档） | - |
+| 2026-09-06 | 2024-07 N1 聴解 逐题 | https://passjapanese.com/en/jlpt/n1/exam/2024-07-listening | 在线参照（未存档） | - |
+| 2026-09-06 | 2024-07 N1 词汇/语法/读解答案（沪江） | https://jp.hujiang.com/nenglikaon1/p1439200/ 等 | 在线参照（未存档） | - |
 
 ## 结论标记
 
