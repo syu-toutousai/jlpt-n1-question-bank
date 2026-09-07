@@ -7,6 +7,8 @@ in the top navigation; 区分 without a material show up as disabled chips.
 """
 import base64
 import glob
+import hashlib
+import json
 import os
 import re
 from functools import lru_cache
@@ -17,6 +19,9 @@ from pathlib import Path
 CARD_QUERY = {"および腰": "及び腰"}
 
 MOJI_WORD_AUDIO = os.path.expanduser("~/moji_audio")
+EXAMPLE_MAP_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "data", "moji_example_map.json")
+EDGE_TTS_DIR = os.path.expanduser("~/edge_tts_examples")
 
 
 @lru_cache(maxsize=None)
@@ -26,6 +31,51 @@ def wpron(word):
         if hits:
             return sorted(hits)[0]
     return None
+
+
+def example_normalize(s):
+    # Key normalisation for the moji-example map (tools/data/*.json).
+    s = FURIGANA_RE.sub(lambda m: m.group(1) + m.group(2), s)
+    s = s.replace("「", "").replace("」", "")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def tts_normalize(s):
+    # Text fed to / hashed for Edge-TTS; keeps 「」 for natural intonation.
+    s = FURIGANA_RE.sub(lambda m: m.group(1) + m.group(2), s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+@lru_cache(maxsize=None)
+def example_map():
+    try:
+        return json.load(open(EXAMPLE_MAP_JSON, encoding="utf-8"))
+    except OSError:
+        return {}
+
+
+def exam_audio(word, sentence):
+    # Prefer the dictionary's own example audio, else Edge-TTS fallback.
+    t = example_normalize(sentence)
+    f = example_map().get(word, {}).get(t)
+    if f and os.path.exists(f):
+        return f, "MOJi 原声"
+    f = os.path.join(EDGE_TTS_DIR,
+                     hashlib.sha1(tts_normalize(sentence).encode()).hexdigest()[:16]
+                     + ".mp3")
+    if os.path.exists(f):
+        return f, "Edge TTS"
+    return None
+
+
+def datauri(path):
+    with open(path, "rb") as fh:
+        return base64.b64encode(fh.read()).decode()
+
+
+def audio_row(label, src):
+    return (f'<div class="sayrow"><span class="saylbl">{esc(label)}</span>'
+            f'<audio controls preload="none" src="data:audio/mpeg;base64,{src}"></audio></div>')
 
 ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS = ROOT / "analysis"
@@ -106,16 +156,24 @@ def render(lines, qbase, answers=frozenset()):
     q_idx = qbase - 1
     cur = None
     open_detail = False
+    cur_word = None
+    aud = {"word_audio": 0, "exam_audio": 0, "exam_moji": 0, "exam_edge": 0}
 
     def say_html(word):
         mp3 = wpron(word)
         if not mp3:
             return None
-        with open(mp3, "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-        return ('<div class="sayrow"><span class="saylbl">辞典発音</span>'
-                f'<audio controls preload="none" '
-                f'src="data:audio/mpeg;base64,{b64}"></audio></div>')
+        aud["word_audio"] += 1
+        return audio_row("辞典発音", datauri(mp3))
+
+    def exam_html(word, sentence):
+        hit = exam_audio(word, sentence)
+        if not hit:
+            return ('<div class="sayrow"><span class="saylbl off">例文発音 · 无音源</span></div>')
+        f, src = hit
+        aud["exam_audio"] += 1
+        aud["exam_moji" if src == "MOJi 原声" else "exam_edge"] += 1
+        return audio_row(f"例文発音 · {src}", datauri(f))
 
     def close_card():
         nonlocal open_detail
@@ -162,6 +220,7 @@ def render(lines, qbase, answers=frozenset()):
             yomi = m.group(2) if m else ""
             word_idx += 1
             cards += 1
+            cur_word = word
             ans_flag = word in answers and not is_dist
             if is_dist:
                 dist += 1
@@ -191,6 +250,10 @@ def render(lines, qbase, answers=frozenset()):
                     label, rest = text.split("：", 1)
                     if label.strip("**") == "作品台词":
                         cur.append(f'<p class="kv drain">{fmt_inline(text)}</p>')
+                    elif label.strip("**") == "MOJi 例句":
+                        cur.append(f'<p class="kv">{fmt_inline(label)}<span>：</span>{fmt_inline(rest)}</p>')
+                        if cur_word:
+                            cur.append(exam_html(cur_word, rest))
                     else:
                         cur.append(f'<p class="kv">{fmt_inline(label)}<span>：</span>{fmt_inline(rest)}</p>')
                 else:
@@ -229,13 +292,14 @@ def render(lines, qbase, answers=frozenset()):
             continue
         cur.append(f'<p>{fmt_inline(line)}</p>')
     close_card()
-    return body, cards, dist
+    return body, cards, dist, aud
 
 
 def main():
     sections_html = []
     total_cards = 0
     total_dist = 0
+    audio_tot = {}
     ready = {}
     for mat in MATERIALS:
         md = ANALYSIS / mat["file"]
@@ -243,11 +307,13 @@ def main():
             print(f"  ! missing material file: {md.name}")
             continue
         text = md.read_text(encoding="utf-8")
-        body, cards, dist = render(text.splitlines(), qbase=mat["qfirst"],
-                                   answers=frozenset(ANSWERS.get(mat["sid"], {}).values()))
+        body, cards, dist, aud = render(text.splitlines(), qbase=mat["qfirst"],
+                                        answers=frozenset(ANSWERS.get(mat["sid"], {}).values()))
         ready[mat["sid"]] = mat
         total_cards += cards
         total_dist += dist
+        for k, v in aud.items():
+            audio_tot[k] = audio_tot.get(k, 0) + v
         sections_html.append(
             f'<section class="bunrui" id="sec-{mat["sid"]}" data-label="{esc(mat["label"])}">'
             f'<div class="bsec"><span class="bno">{esc(mat["label"])}</span>'
@@ -264,6 +330,7 @@ def main():
             nav.append(f'<span class="chip off">{esc(label)}<i>未作成</i></span>')
 
     answers_js = json_answers(ANSWERS)
+    embeds = audio_tot.get("word_audio", 0) + audio_tot.get("exam_audio", 0)
 
     html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -317,6 +384,7 @@ details.card[open]>summary{{border-bottom:1px solid var(--line);background:var(-
 .cbody rt{{font-size:.55em;color:var(--sub);font-weight:700}}
 .sayrow{{display:flex;align-items:center;gap:10px;margin:10px 0 14px}}
 .saylbl{{flex:none;font-size:12.5px;font-weight:700;color:var(--acc);border:1px solid var(--line);border-radius:20px;padding:3px 10px;background:var(--bg2)}}
+.saylbl.off{{color:var(--sub);font-weight:600}}
 .sayrow audio{{height:36px;width:min(280px,78%);border-radius:18px}}
 .kv b{{color:var(--acc)}}
 .note-p{{background:var(--acc2);border-radius:8px;padding:6px 10px;font-size:13px}}
@@ -342,7 +410,7 @@ a.toplink{{color:#fff;opacity:.9;font-size:12.5px;text-decoration:underline}}
 <header>
   <h1>{TITLE}</h1>
   <p>题干汉字词 × 有意义干扰项 ・ MOJi辞書 读音/释义/例句 ＋ Nadeshiko 动漫日剧真实台词</p>
-  <div class="tags"><span>{total_cards} 词条</span><span>{total_dist} 干扰项</span><span>音频/截图可直接播放</span></div>
+  <div class="tags"><span>{total_cards} 词条</span><span>{total_dist} 干扰项</span><span>{embeds} 发音内嵌</span></div>
 </header>
 <div class="nav"><span class="nlabel">区分</span>{chr(10).join(nav)}</div>
 <div class="toolbar">
@@ -375,8 +443,11 @@ secs.forEach(s=>io.observe(s));
 </body>
 </html>"""
     OUT.write_text(html, encoding="utf-8")
-    say_count = html.count("data:audio/mpeg;base64,")
-    print(f"WROTE {OUT}  [{total_cards}] cards ({total_dist} distractor) across {len(ready)}/{len(MATERIALS)} materials, {len(html)//1024} KB, {say_count} 辞典発音 embeds")
+    embeds = audio_tot.get("word_audio", 0) + audio_tot.get("exam_audio", 0)
+    print(f"WROTE {OUT}  [{total_cards}] cards ({total_dist} distractor) across {len(ready)}/{len(MATERIALS)} materials, "
+          f"{len(html)//1024} KB, {embeds} 内嵌发音 = "
+          f"{audio_tot.get('word_audio',0)} 辞典 + {audio_tot.get('exam_audio',0)} 例文 "
+          f"(MOJi原声 {audio_tot.get('exam_moji',0)} / Edge TTS {audio_tot.get('exam_edge',0)})")
 
 
 def json_answers(answers):
