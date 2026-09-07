@@ -31,8 +31,8 @@ class QuestionBank:
         q_type = question_data.get("type", "unknown")
         q_number = question_data.get("number", 0)
         
-        # Save to past-exams
-        past_exam_path = self.past_exams / str(year) / section
+        # Save to past-exams/<year>/<month>/<section>
+        past_exam_path = self.past_exams / str(year) / f"{month:02d}" / section
         past_exam_path.mkdir(parents=True, exist_ok=True)
         
         filename = f"{q_type}_{q_number:02d}.json"
@@ -69,20 +69,21 @@ class QuestionBank:
         }
         
         for year_dir in self.past_exams.iterdir():
-            if year_dir.is_dir():
-                year = year_dir.name
-                stats["by_year"][year] = 0
-                
-                for section_dir in year_dir.iterdir():
-                    if section_dir.is_dir():
-                        section = section_dir.name
-                        if section not in stats["by_section"]:
-                            stats["by_section"][section] = 0
-                        
-                        for q_file in section_dir.glob("*.json"):
-                            stats["total_questions"] += 1
-                            stats["by_section"][section] += 1
-                            stats["by_year"][year] += 1
+            if not year_dir.is_dir():
+                continue
+            year = year_dir.name
+            stats["by_year"][year] = 0
+            month_dirs = list(year_dir.iterdir())
+            for month_dir in month_dirs:
+                if month_dir.is_dir() and month_dir.name.isdigit():
+                    for section_dir in month_dir.iterdir():
+                        if section_dir.is_dir():
+                            section = section_dir.name
+                            stats["by_section"].setdefault(section, 0)
+                            for q_file in section_dir.glob("*.json"):
+                                stats["total_questions"] += 1
+                                stats["by_section"][section] += 1
+                                stats["by_year"][year] += 1
         
         return stats
 

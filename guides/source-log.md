@@ -25,6 +25,12 @@
 | 2026-09-08 | 全 58 词卡辞典発音内嵌（MOJi 词条 TTS，_w_ 音频→data URI，覆盖 問題1/問題2 全部卡片；另补下 29 词词条发音） | https://www.mojidict.com （本地 moji CLI，音频库 ~/moji_audio） | ✅ 58/58 内嵌，mp3 校验通过 | - |
 | 2026-09-08 | 题干速览 13 条题干文の発音（Edge TTS ja-JP-NanamiNeural，→~/edge_tts_examples）＋ 例文29条合成与 27条MOJi原声 | https://www.mojidict.com / edge-tts | ✅ 13 题干 + 56 例文（27 原声/29 合成）全部发音内嵌 | - |
 | 2026-09-08 | 学习页発音ボタン内联化（词/例句/台词/题干 直后按钮，去标签）＋ 发行源凡例区分（MOJi 蓝 / Edge 橙 / Nadeshiko 绿） | 生成器 tools/build_words_html.py | ✅ js 交互/几何位置验证通过；修复题干速览行此前未渲染的问题 | - |
+| 2026-09-08 | 2024年12月 N1 真題全文（笔试 問題1-13 共66题，逐句原文） | https://jlpt247.com/n1-jlpt-12-2024/ | ✅ 主题干出处；无正确标记，答案另行交叉核对 | refs/2024-12_jlpt247_full.html |
+| 2026-09-08 | 2024年12月 N1 答案66题（数字+选项文本，含並べ替え重建句） | http://aixinjp.com/a/lianxifangshi/zhentidaan/2024/1203/1172.html | ✅ 主答案源；问题1-7/8-13 选项文本逐一匹配；Q34键标③系笔误(自引文本=选项2)；Q13=3とっさに | refs/2024-12_answerkey_aixinjp.html |
+| 2026-09-08 | 2024年12月 N1 文字・語彙/文法答案 Q1-44（第二大源） | https://learnjapaneseaz.com/jlpt-n1-12-2024.html | ⚠️ 与aixinjp Q1-44全符，唯一分歧 Q13=1じきに(疑误)；读解未收录 | refs/2024-12_answerkey_learnjapaneseaz.html |
+| 2026-09-08 | 2024年12月 N1 答案（第六时限）——页面正文无答案内容 | https://www.diliushixian.com/information/4519.html | ⚠️ 空页（未发布答案），仅存档 | refs/2024-12_answerkey_diliushixian.html |
+| 2026-09-08 | 2024年12月 N1 答案（沪江语法/读解） | https://jp.hujiang.com/nenglikaon1/p1443106/ 、 m.hujiang.com/jp_nenglikaoN1/p1443108/ | ⚠️ 页面无正文（仅导航，JS渲染），未采用 | refs/2024-12_answerkey_hujiang_gram.html |
+| 2026-09-08 | 2024年12月 N1 答案（nihongoaz / 新干线） | https://nihongoaz.com/jlpt-n1-12-2024.html 、 https://www.xgxedu.com/html/kszx/6401.html | ⚠️ 无正文（JS渲染/GBK图片），未采用 | refs/2024-12_answerkey_nihongoaz.html 、 refs/2024-12_answerkey_xgxedu.html |
 
 ## 结论标记
 
