@@ -23,6 +23,8 @@
 | 2026-09-07 | 問題2 Q7-13 学习材料例句/截图/音频：Nadeshiko | https://nadeshiko.co （本地 nadeshiko CLI） | SAFE 优先；繰り越す/低迷 无台词、および腰仅1条 | - |
 | 2026-09-07 | 「足手まとい」标准读法确认 | コトバンク(大辞泉/精選版)・weblio | ✅ 通行读法 あしてまとい（「あしでまとい」とも）；moji 表记为 あしでまとい④ | www.kotobank.jp/word/足手纏い-424568 |
 | 2026-09-08 | 全 58 词卡辞典発音内嵌（MOJi 词条 TTS，_w_ 音频→data URI，覆盖 問題1/問題2 全部卡片；另补下 29 词词条发音） | https://www.mojidict.com （本地 moji CLI，音频库 ~/moji_audio） | ✅ 58/58 内嵌，mp3 校验通过 | - |
+| 2026-09-08 | 题干速览 13 条题干文の発音（Edge TTS ja-JP-NanamiNeural，→~/edge_tts_examples）＋ 例文29条合成与 27条MOJi原声 | https://www.mojidict.com / edge-tts | ✅ 13 题干 + 56 例文（27 原声/29 合成）全部发音内嵌 | - |
+| 2026-09-08 | 学习页発音ボタン内联化（词/例句/台词/题干 直后按钮，去标签）＋ 发行源凡例区分（MOJi 蓝 / Edge 橙 / Nadeshiko 绿） | 生成器 tools/build_words_html.py | ✅ js 交互/几何位置验证通过；修复题干速览行此前未渲染的问题 | - |
 
 ## 结论标记
 

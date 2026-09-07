@@ -46,6 +46,15 @@ def tts_normalize(s):
     return re.sub(r"\s+", " ", s).strip()
 
 
+STEM_NUM_RE = re.compile(r"^\d+[.、]\s*")
+
+
+def stem_text(s):
+    # Edge-TTS text for 题干速览 lines: strip a leading "7. " question number.
+    s = STEM_NUM_RE.sub("", s)
+    return tts_normalize(s)
+
+
 @lru_cache(maxsize=None)
 def example_map():
     try:
@@ -73,20 +82,15 @@ def datauri(path):
         return "data:audio/mpeg;base64," + base64.b64encode(fh.read()).decode()
 
 
-def play_ctrl(src, title=""):
-    # Compact icon-only audio play button (replaces the browser control bar).
+def ip_btn(src, cls, title=""):
+    # Inline icon-only play button (placed right after the word/sentence it
+    # reads out). cls ∈ {moji, edge, nade} decides the icon colour (see 凡例).
     tt = f' title="{esc(title)}"' if title else ""
-    return ('<span class="psay"><button class="pbtn" '
-            f'aria-label="播放"{tt}>'
-            '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">'
+    return (f'<span class="ip"><button class="pb pb--{esc(cls)}" aria-label="播放"{tt}>'
+            '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">'
             '<path class="ic-play" d="M8 5.5v13l11-6.5z"/>'
             '<path class="ic-stop" d="M6 6h4v12H6zM14 6h4v12h-4z" style="display:none"/></svg>'
             f'</button><audio preload="none" src="{src}"></audio></span>')
-
-
-def audio_row(label, src):
-    return (f'<div class="sayrow"><span class="saylbl">{esc(label)}</span>'
-            f'{play_ctrl(src, label)}</div>')
 
 ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS = ROOT / "analysis"
@@ -168,29 +172,41 @@ def render(lines, qbase, answers=frozenset()):
     cur = None
     open_detail = False
     cur_word = None
-    aud = {"word_audio": 0, "exam_audio": 0, "exam_moji": 0, "exam_edge": 0}
+    in_stem = False
+    last_s = None
+    aud = {"word_audio": 0, "exam_audio": 0, "exam_moji": 0, "exam_edge": 0,
+           "stem_audio": 0, "nade_audio": 0}
 
-    def say_html(word):
+    def word_ip(word):
         mp3 = wpron(word)
         if not mp3:
-            return None
+            return ""
         aud["word_audio"] += 1
-        return audio_row("辞典発音", datauri(mp3))
+        return ip_btn(datauri(mp3), "moji")
 
-    def exam_html(word, sentence):
+    def exam_ip(word, sentence):
         hit = exam_audio(word, sentence)
         if not hit:
-            return ('<div class="sayrow"><span class="saylbl off">例文発音 · 无音源</span></div>')
+            return ""
         f, src = hit
         aud["exam_audio"] += 1
         aud["exam_moji" if src == "MOJi 原声" else "exam_edge"] += 1
-        return audio_row(f"例文発音 · {src}", datauri(f))
+        return ip_btn(datauri(f), "moji" if src == "MOJi 原声" else "edge")
+
+    def stem_ip(sentence):
+        h = hashlib.sha1(stem_text(sentence).encode()).hexdigest()[:16]
+        f = Path(EDGE_TTS_DIR) / f"{h}.mp3"
+        if not f.exists():
+            return ""
+        aud["stem_audio"] += 1
+        return ip_btn(datauri(f), "edge")
 
     def close_card():
-        nonlocal open_detail
+        nonlocal open_detail, last_s
         if open_detail:
             body.append("</div></details>")
             open_detail = False
+        last_s = None
 
     for raw in lines:
         line = raw.rstrip()
@@ -210,6 +226,7 @@ def render(lines, qbase, answers=frozenset()):
         if line.startswith("## "):
             close_card()
             title = line[3:]
+            in_stem = title.startswith("题干速览")
             if title.startswith(("题干速览", "干扰项一览", "干扰项")):
                 body.append(f'<h2 class="sec">{esc(title)}</h2>')
             else:
@@ -235,23 +252,24 @@ def render(lines, qbase, answers=frozenset()):
             ans_flag = word in answers and not is_dist
             if is_dist:
                 dist += 1
+            wp = word_ip(word)
             body.append(
                 f'<details class="card" id="w-{esc(word)}" data-w="{esc(word)}"><summary>'
                 f'<span class="wn">{esc(word)}</span>'
                 f'{"<span class=\"wy\">" + esc(yomi) + "</span>" if yomi else ""}'
+                f'{wp}'
                 f'{"<span class=\"tag ok\">★正解</span>" if ans_flag else ""}'
                 f'{"<span class=\"tag\">干扰项</span>" if is_dist else ""}'
                 f'</summary><div class="cbody">')
             open_detail = True
             cur = body
-            s = say_html(word)
-            if s:
-                body.append(s)
-            continue
-        if cur is None:
             continue
         m = re.match(r"^(\s*)[-*]\s+(.*)$", line)
         if m:
+            # 题干速览 lives before the first card; unlike other sections it
+            # must still be rendered (its bullets carry the stem sentences).
+            if cur is None and not in_stem:
+                continue
             depth = m.group(1).count(" ")
             if depth == 0:
                 text = m.group(2)
@@ -262,11 +280,13 @@ def render(lines, qbase, answers=frozenset()):
                     if label.strip("**") == "作品台词":
                         cur.append(f'<p class="kv drain">{fmt_inline(text)}</p>')
                     elif label.strip("**") == "MOJi 例句":
-                        cur.append(f'<p class="kv">{fmt_inline(label)}<span>：</span>{fmt_inline(rest)}</p>')
-                        if cur_word:
-                            cur.append(exam_html(cur_word, rest))
+                        cur.append(f'<p class="kv">{fmt_inline(label)}<span>：</span>'
+                                   f'{fmt_inline(rest)}{exam_ip(cur_word, rest)}</p>')
                     else:
                         cur.append(f'<p class="kv">{fmt_inline(label)}<span>：</span>{fmt_inline(rest)}</p>')
+                elif in_stem:
+                    (body if cur is None else cur).append(
+                        f'<p class="kv stem">{fmt_inline(text)}{stem_ip(text)}</p>')
                 else:
                     cur.append(f'<p>{fmt_inline(text)}</p>')
             elif depth == 2:
@@ -275,6 +295,7 @@ def render(lines, qbase, answers=frozenset()):
                     cur.append(f'<p class="rare">{fmt_inline(t.strip("*"))}</p>')
                 else:
                     cur.append(f'<div class="s-h"><span class="m-ico">🎬</span>{fmt_inline(t)}</div>')
+                    last_s = len(cur) - 1
             elif depth == 4:
                 t = m.group(2)
                 if t.startswith("EN:"):
@@ -291,7 +312,11 @@ def render(lines, qbase, answers=frozenset()):
                         elif u.endswith((".webp", ".png", ".jpg")):
                             img = u
                     if au:
-                        cur.append(f'<div class="sayrow">{play_ctrl(esc(au), "台词发音")}</div>')
+                        if last_s is not None and cur is body:
+                            body[last_s] = body[last_s][:-6] + ip_btn(esc(au), "nade") + "</div>"
+                            aud["nade_audio"] += 1
+                        else:
+                            cur.append(ip_btn(esc(au), "nade"))
                     if img:
                         cur.append(f'<img loading="lazy" src="{esc(img)}" alt="场景截图">')
                     if not au and not img:
@@ -301,7 +326,7 @@ def render(lines, qbase, answers=frozenset()):
             else:
                 cur.append(f'<p>{fmt_inline(m.group(2))}</p>')
             continue
-        cur.append(f'<p>{fmt_inline(line)}</p>')
+        (body if cur is None else cur).append(f'<p>{fmt_inline(line)}</p>')
     close_card()
     return body, cards, dist, aud
 
@@ -341,7 +366,8 @@ def main():
             nav.append(f'<span class="chip off">{esc(label)}<i>未作成</i></span>')
 
     answers_js = json_answers(ANSWERS)
-    embeds = audio_tot.get("word_audio", 0) + audio_tot.get("exam_audio", 0)
+    embeds = (audio_tot.get("word_audio", 0) + audio_tot.get("exam_audio", 0)
+              + audio_tot.get("stem_audio", 0))
 
     html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -368,6 +394,12 @@ main{{max-width:960px;margin:-14px auto 40px;padding:0 16px}}
 .chip.off{{color:#b8becd;border-style:dashed;position:relative}}
 .chip.off i{{font-style:normal;font-size:10.5px;margin-left:6px;color:#c8cdd9}}
 .toolbar{{position:sticky;top:44px;z-index:39;background:rgba(245,247,251,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}}
+.legend{{display:flex;gap:0;flex-wrap:wrap;align-items:center;justify-content:center;background:var(--card);border-bottom:1px solid var(--line);padding:7px 16px;font-size:12px;color:var(--sub)}}
+.legend>span{{display:inline-flex;align-items:center;gap:6px;padding:0 14px}}
+.legend .lg{{width:11px;height:11px;border-radius:50%;display:inline-block}}
+.lg--moji{{background:#4f6ef7}}
+.lg--edge{{background:#e8590c}}
+.lg--nade{{background:#1f9d55}}
 .toolbar input{{flex:1;min-width:200px;border:1.5px solid var(--line);border-radius:99px;padding:8px 16px;font-size:13.5px;outline:none;background:#fff}}
 .toolbar .cnt{{font-size:12.5px;color:var(--sub);font-weight:600}}
 .bunrui{{scroll-margin-top:110px}}
@@ -393,15 +425,15 @@ details.card[open]>summary{{border-bottom:1px solid var(--line);background:var(-
 .cbody p,.cbody div{{margin:7px 0;font-size:14px}}
 .cbody ruby{{color:var(--ink)}}
 .cbody rt{{font-size:.55em;color:var(--sub);font-weight:700}}
-.sayrow{{display:flex;align-items:center;gap:10px;margin:10px 0 14px}}
-.saylbl{{flex:none;font-size:12.5px;font-weight:700;color:var(--acc);border:1px solid var(--line);border-radius:20px;padding:3px 10px;background:var(--bg2)}}
-.saylbl.off{{color:var(--sub);font-weight:600}}
-.psay{{display:inline-flex;align-items:center}}
-.psay audio{{width:1px;height:1px;position:absolute;opacity:0;pointer-events:none}}
-.pbtn{{flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--acc);background:var(--acc2);color:var(--acc);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:transform .12s ease,background .12s ease;padding:0}}
-.pbtn:hover{{background:var(--acc);color:#fff;transform:scale(1.07)}}
-.pbtn.on{{background:var(--acc);color:#fff;animation:pulse 1.4s ease infinite}}
-@@keyframes pulse{{0%,100%{{box-shadow:0 0 0 0 rgba(79,110,247,.45)}}50%{{box-shadow:0 0 0 7px rgba(79,110,247,0)}}}}
+.ip{{display:inline-flex;align-items:center;vertical-align:-0.18em;margin-left:6px}}
+.ip audio{{width:1px;height:1px;position:absolute;opacity:0;pointer-events:none}}
+.pb{{flex:none;width:25px;height:25px;border-radius:50%;border:1.5px solid var(--pb);background:color-mix(in srgb,var(--pb) 10%,#fff);color:var(--pb);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:transform .12s ease,background .12s ease;padding:0}}
+.pb--moji{{--pb:#4f6ef7}}
+.pb--edge{{--pb:#e8590c}}
+.pb--nade{{--pb:#1f9d55}}
+.pb:hover,.pb.on{{background:var(--pb);color:#fff;transform:scale(1.1)}}
+summary .ip{{vertical-align:-0.15em}}
+@keyframes pulse{{0%,100%{{box-shadow:0 0 0 0 rgba(79,110,247,.4)}}50%{{box-shadow:0 0 0 6px rgba(79,110,247,0)}}}}
 .kv b{{color:var(--acc)}}
 .note-p{{background:var(--acc2);border-radius:8px;padding:6px 10px;font-size:13px}}
 .drain{{color:#7f2ff7}}
@@ -428,6 +460,7 @@ a.toplink{{color:#fff;opacity:.9;font-size:12.5px;text-decoration:underline}}
   <div class="tags"><span>{total_cards} 词条</span><span>{total_dist} 干扰项</span><span>{embeds} 发音内嵌</span></div>
 </header>
 <div class="nav"><span class="nlabel">区分</span>{chr(10).join(nav)}</div>
+<div class="legend"><span><span class="lg lg--moji"></span>MOJi辞書 原声</span><span><span class="lg lg--edge"></span>Edge TTS 合成</span><span><span class="lg lg--nade"></span>Nadeshiko 台词</span></div>
 <div class="toolbar">
   <input id="q" placeholder="🔍 搜索词条 / 读音 / 例句…">
   <span class="cnt" id="cnt"></span>
@@ -454,8 +487,8 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{{
  chips.forEach(c=>c.dataset.cur=c.getAttribute('href')==='#'+e.target.id?'1':'0');
 }}),{{rootMargin:'-40% 0px -55% 0px'}});
 secs.forEach(s=>io.observe(s));
-// icon-only audio player: one source at a time, toggle play/stop
-const pbtns=[...document.querySelectorAll('.pbtn')];
+// icon-only audio player (inline buttons): one source at a time; capture
+// phase so a click on a button inside a <summary> can't toggle the card.
 const PLAY_SVG='<path class="ic-play" d="M8 5.5v13l11-6.5z"/><path class="ic-stop" d="M6 6h4v12H6zM14 6h4v12h-4z" style="display:none"/>';
 const STOP_SVG='<path class="ic-play" d="M8 5.5v13l11-6.5z" style="display:none"/><path class="ic-stop" d="M6 6h4v12H6zM14 6h4v12h-4z"/>';
 function off(b){{
@@ -465,7 +498,8 @@ function off(b){{
 }}
 let cur=null;
 document.addEventListener('click',e=>{{
- const btn=e.target.closest('.pbtn');if(!btn)return;
+ const btn=e.target.closest('.pb');if(!btn)return;
+ e.preventDefault();e.stopImmediatePropagation();
  const a=btn.parentNode.querySelector('audio');if(!a)return;
  if(cur&&cur!==btn)off(cur);
  if(a.paused){{
@@ -475,7 +509,12 @@ document.addEventListener('click',e=>{{
  }}else{{
   off(btn);cur=null;
  }}
-}});
+}},true);
+document.addEventListener('ended',e=>{{
+ if(cur&&e.target===cur.parentNode.querySelector('audio')){{
+  off(cur);cur=null;
+ }}
+}},true);
 document.addEventListener('ended',e=>{{
  if(cur&&e.target===cur.parentNode.querySelector('audio')){{
   off(cur);cur=null;
@@ -485,11 +524,12 @@ document.addEventListener('ended',e=>{{
 </body>
 </html>"""
     OUT.write_text(html, encoding="utf-8")
-    embeds = audio_tot.get("word_audio", 0) + audio_tot.get("exam_audio", 0)
+    embeds = audio_tot.get("word_audio", 0) + audio_tot.get("exam_audio", 0) + audio_tot.get("stem_audio", 0)
     print(f"WROTE {OUT}  [{total_cards}] cards ({total_dist} distractor) across {len(ready)}/{len(MATERIALS)} materials, "
           f"{len(html)//1024} KB, {embeds} 内嵌发音 = "
           f"{audio_tot.get('word_audio',0)} 辞典 + {audio_tot.get('exam_audio',0)} 例文 "
-          f"(MOJi原声 {audio_tot.get('exam_moji',0)} / Edge TTS {audio_tot.get('exam_edge',0)})")
+          f"(MOJi原声 {audio_tot.get('exam_moji',0)} / Edge TTS {audio_tot.get('exam_edge',0)}) "
+          f"+ {audio_tot.get('stem_audio',0)} 题干 + {audio_tot.get('nade_audio',0)} 台词(远程)")
 
 
 def json_answers(answers):
