@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""Build docs/vocab-words.html — standalone study page from analysis markdown.
+"""Build docs/vocab-words[-SESSION].html — standalone study page from analysis markdown.
 
 Multiple analysis files map to exam 区分 (問題1…問題13・聴解). Each material
 file is rendered inside a <section class="bunrui" id="sec-<sid>"> and appears
 in the top navigation; 区分 without a material show up as disabled chips.
+
+Usage:
+    python3 tools/build_words_html.py --session 2024-07
+    python3 tools/build_words_html.py --session 2024-12
+    python3 tools/build_words_html.py --all          # build both sessions
 """
 import base64
 import glob
@@ -18,10 +23,65 @@ from pathlib import Path
 # (card word → MOJi query spelling, used to locate the word-pron TTS file).
 CARD_QUERY = {"および腰": "及び腰"}
 
+# Extra card anchor ids: a stem-surface form that differs from the dictionary-form
+# heading word gets its own id so index.html deep links (#w-…) still resolve.
+# Multiple ids are space-separated (browsers resolve fragment to any token).
+CARD_ID_ALIAS = {"侮る": ["侮って"]}
+
 MOJI_WORD_AUDIO = os.path.expanduser("~/moji_audio")
 EXAMPLE_MAP_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                 "data", "moji_example_map.json")
 EDGE_TTS_DIR = os.path.expanduser("~/edge_tts_examples")
+
+# All exam 区分, in exam order. sids are stable anchors.
+BUNRUI = [
+    ("q1", "問題1 読み方"),
+    ("q2", "問題2 文脈規定"),
+    ("q3", "問題3 言い換え"),
+    ("q4", "問題4 使い方"),
+    ("q5", "問題5 文法選択"),
+    ("q6", "問題6 並べ替え"),
+    ("q7", "問題7 文章の文法"),
+    ("q8", "問題8 短文読解"),
+    ("q9", "問題9 中文読解"),
+    ("q10", "問題10 長文読解A"),
+    ("q11", "問題11 統合理解"),
+    ("q12", "問題12 情報検索"),
+    ("q13", "問題13 長文読解B"),
+    ("toki", "聴解"),
+]
+
+# Per-session configuration: session_id → {title, materials, answers, sub}
+SESSIONS = {
+    "2024-07": {
+        "title": "2024年7月 JLPT N1 語注・例句集",
+        "sub": "题干汉字词 × 有意义干扰项 ・ MOJi辞書 读音/释义/例句 ＋ Nadeshiko 动漫日剧真实台词",
+        "materials": [
+            {"file": "2024-07-vocab-reading-words.md", "sid": "q1", "qfirst": 1,
+             "label": "問題1 読み方", "sub": "Q1–6 読み方 ・ 漢字語の読み"},
+            {"file": "2024-07-vocab-context-words.md", "sid": "q2", "qfirst": 7,
+             "label": "問題2 文脈規定", "sub": "Q7–13 文脈規定 ・ 語を正しく判断"},
+        ],
+        "answers": {
+            "q1": {1: "腐敗", 2: "粗い", 3: "粘膜", 4: "寿命", 5: "戒める", 6: "誓約書"},
+            "q2": {7: "根底", 8: "返上", 9: "取り次ぐ", 10: "交錯", 11: "難航", 12: "がやがや", 13: "足手まとい"},
+        },
+    },
+    "2024-12": {
+        "title": "2024年12月 JLPT N1 語注・例句集",
+        "sub": "题干汉字词 × 有意义干扰项 ・ MOJi辞書 读音/释义/例句 ＋ Nadeshiko 动漫日剧真实台词",
+        "materials": [
+            {"file": "2024-12-vocab-reading-words.md", "sid": "q1", "qfirst": 1,
+             "label": "問題1 読み方", "sub": "Q1–6 読み方 ・ 漢字語の読み"},
+            {"file": "2024-12-vocab-context-words.md", "sid": "q2", "qfirst": 7,
+             "label": "問題2 文脈規定", "sub": "Q7–13 文脈規定 ・ 語を正しく判断"},
+        ],
+        "answers": {
+            "q1": {1: "絶叫", 2: "背後", 3: "抱負", 4: "侮る", 5: "筋道", 6: "奔放"},
+            "q2": {7: "適応", 8: "掲げる", 9: "踏襲", 10: "足止め", 11: "へとへと", 12: "払拭", 13: "とっさに"},
+        },
+    },
+}
 
 
 @lru_cache(maxsize=None)
@@ -95,42 +155,6 @@ def ip_btn(src, cls, title=""):
 ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS = ROOT / "analysis"
 OUT = ROOT / "docs" / "vocab-words.html"
-
-TITLE = "2024年7月 JLPT N1 語注・例句集"
-
-# All exam 区分, in exam order. sids are stable anchors.
-BUNRUI = [
-    ("q1", "問題1 読み方"),
-    ("q2", "問題2 文脈規定"),
-    ("q3", "問題3 言い換え"),
-    ("q4", "問題4 使い方"),
-    ("q5", "問題5 文法選択"),
-    ("q6", "問題6 並べ替え"),
-    ("q7", "問題7 文章の文法"),
-    ("q8", "問題8 短文読解"),
-    ("q9", "問題9 中文読解"),
-    ("q10", "問題10 長文読解A"),
-    ("q11", "問題11 統合理解"),
-    ("q12", "問題12 情報検索"),
-    ("q13", "問題13 長文読解B"),
-    ("toki", "聴解"),
-]
-
-# Material manifest: 区分 → analysis file (relative to analysis/). qfirst is
-# the first exam question number of this block (distinct from the 区分 index).
-MATERIALS = [
-    {"file": "2024-07-vocab-reading-words.md", "sid": "q1", "qfirst": 1, "label": "問題1 読み方",
-     "sub": "Q1–6 読み方 ・ 漢字語の読み"},
-    {"file": "2024-07-vocab-context-words.md", "sid": "q2", "qfirst": 7, "label": "問題2 文脈規定",
-     "sub": "Q7–13 文脈規定 ・ 語を正しく判断"},
-]
-
-# Correct answers (exam question number → word) per 区分, for ★正解 & cross-links.
-# Card spelling must equal the ### heading word of the corresponding card.
-ANSWERS = {
-    "q1": {1: "腐敗", 2: "粗い", 3: "粘膜", 4: "寿命", 5: "戒める", 6: "誓約書"},
-    "q2": {7: "根底", 8: "返上", 9: "取り次ぐ", 10: "交錯", 11: "難航", 12: "がやがや", 13: "足手まとい"},
-}
 
 
 def esc(s):
@@ -253,8 +277,9 @@ def render(lines, qbase, answers=frozenset()):
             if is_dist:
                 dist += 1
             wp = word_ip(word)
+            ids = " ".join(f"w-{esc(w)}" for w in [word] + CARD_ID_ALIAS.get(word, []))
             body.append(
-                f'<details class="card" id="w-{esc(word)}" data-w="{esc(word)}"><summary>'
+                f'<details class="card" id="{ids}" data-w="{esc(word)}"><summary>'
                 f'<span class="wn">{esc(word)}</span>'
                 f'{"<span class=\"wy\">" + esc(yomi) + "</span>" if yomi else ""}'
                 f'{wp}'
@@ -331,20 +356,20 @@ def render(lines, qbase, answers=frozenset()):
     return body, cards, dist, aud
 
 
-def main():
+def main(title, sub, materials, answers, out_path):
     sections_html = []
     total_cards = 0
     total_dist = 0
     audio_tot = {}
     ready = {}
-    for mat in MATERIALS:
+    for mat in materials:
         md = ANALYSIS / mat["file"]
         if not md.exists():
             print(f"  ! missing material file: {md.name}")
             continue
         text = md.read_text(encoding="utf-8")
         body, cards, dist, aud = render(text.splitlines(), qbase=mat["qfirst"],
-                                        answers=frozenset(ANSWERS.get(mat["sid"], {}).values()))
+                                        answers=frozenset(answers.get(mat["sid"], {}).values()))
         ready[mat["sid"]] = mat
         total_cards += cards
         total_dist += dist
@@ -365,7 +390,7 @@ def main():
         else:
             nav.append(f'<span class="chip off">{esc(label)}<i>未作成</i></span>')
 
-    answers_js = json_answers(ANSWERS)
+    answers_js = json_answers(answers)
     embeds = (audio_tot.get("word_audio", 0) + audio_tot.get("exam_audio", 0)
               + audio_tot.get("stem_audio", 0))
 
@@ -375,7 +400,7 @@ def main():
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>{TITLE}</title>
+<title>{title}</title>
 <style>
 :root{{--bg:#f5f7fb;--card:#fff;--ink:#1c2333;--sub:#5b6478;--line:#e4e7f0;--acc:#4f6ef7;--acc2:#eef1ff;--warn:#e8590c;--ok:#1f9d55;--c:#7a4ff7}}
 *{{box-sizing:border-box;margin:0;padding:0}}
@@ -455,8 +480,8 @@ a.toplink{{color:#fff;opacity:.9;font-size:12.5px;text-decoration:underline}}
 </head>
 <body>
 <header>
-  <h1>{TITLE}</h1>
-  <p>题干汉字词 × 有意义干扰项 ・ MOJi辞書 读音/释义/例句 ＋ Nadeshiko 动漫日剧真实台词</p>
+  <h1>{title}</h1>
+  <p>{sub}</p>
   <div class="tags"><span>{total_cards} 词条</span><span>{total_dist} 干扰项</span><span>{embeds} 发音内嵌</span></div>
 </header>
 <div class="nav"><span class="nlabel">区分</span>{chr(10).join(nav)}</div>
@@ -523,9 +548,9 @@ document.addEventListener('ended',e=>{{
 </script>
 </body>
 </html>"""
-    OUT.write_text(html, encoding="utf-8")
+    out_path.write_text(html, encoding="utf-8")
     embeds = audio_tot.get("word_audio", 0) + audio_tot.get("exam_audio", 0) + audio_tot.get("stem_audio", 0)
-    print(f"WROTE {OUT}  [{total_cards}] cards ({total_dist} distractor) across {len(ready)}/{len(MATERIALS)} materials, "
+    print(f"WROTE {out_path}  [{total_cards}] cards ({total_dist} distractor) across {len(ready)}/{len(materials)} materials, "
           f"{len(html)//1024} KB, {embeds} 内嵌发音 = "
           f"{audio_tot.get('word_audio',0)} 辞典 + {audio_tot.get('exam_audio',0)} 例文 "
           f"(MOJi原声 {audio_tot.get('exam_moji',0)} / Edge TTS {audio_tot.get('exam_edge',0)}) "
@@ -537,6 +562,27 @@ def json_answers(answers):
 
 
 import json
+import argparse
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Build vocab-words HTML page")
+    parser.add_argument("--session", choices=list(SESSIONS.keys()),
+                        help="Build a single session (e.g. 2024-07, 2024-12)")
+    parser.add_argument("--all", action="store_true",
+                        help="Build all sessions")
+    args = parser.parse_args()
+
+    sessions_to_build = []
+    if args.all:
+        sessions_to_build = list(SESSIONS.keys())
+    elif args.session:
+        sessions_to_build = [args.session]
+    else:
+        parser.print_help()
+        raise SystemExit(1)
+
+    for sid in sessions_to_build:
+        cfg = SESSIONS[sid]
+        out = ROOT / "docs" / (f"vocab-words-{sid}.html" if sid != "2024-07" else "vocab-words.html")
+        main(title=cfg["title"], sub=cfg["sub"], materials=cfg["materials"],
+             answers=cfg["answers"], out_path=out)
