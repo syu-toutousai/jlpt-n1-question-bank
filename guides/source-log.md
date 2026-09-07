@@ -16,6 +16,9 @@
 | 2026-09-06 | 2024-07 N1 词汇/语法/读解答案（沪江） | https://jp.hujiang.com/nenglikaon1/p1439200/ 等 | 在线参照（未存档） | - |
 | 2026-09-06 | 学习材料语注生成：MOJi辞書（读音/释义/JLPT例句+TTS） | https://www.mojidict.com （本地 moji CLI 查询） | 逐词查询，用于生成 analysis/2024-07-vocab-reading-words.md | - |
 | 2026-09-06 | 学习材料例句生成：Nadeshiko 动漫/日剧台词库（含截图/音频 URL） | https://nadeshiko.co （本地 nadeshiko CLI 查询） | 每个词条取 SAFE 等级例句，示例见 guides 说明 | - |
+| 2026-09-07 | 2024-07 N1 词彙問題1全部题及答案词全文（含問題2 Q7-13 正确答案词） | http://aixinjp.com/a/lianxifangshi/zhentidaan/2024/0708/1143.html | ✅ Q7-13 答案（2・4・4・1・1・3・2）；Q8=返上4 与第六时限=2 相左，判定 4 | - |
+| 2026-09-07 | 2024-07 N1 問題2 Q13 题干+4选项（骨折り/足手まとい/裏目/および腰） | https://nihongoaz.com/jlpt-n1-vocabulary-practice-test-30.html | ✅ 与 learnjapaneseaz 同源互证，答案=足手まとい | - |
+| 2026-09-07 | 2024-07 N1 語彙・文法・読解 逐题（越南语题面，可核对 Q13 题干） | https://trynihongo.com/ja/de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-07-2024-q1353 | 参照（在线，未存档） | - |
 
 ## 结论标记
 
