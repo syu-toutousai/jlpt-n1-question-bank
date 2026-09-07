@@ -19,6 +19,9 @@
 | 2026-09-07 | 2024-07 N1 词彙問題1全部题及答案词全文（含問題2 Q7-13 正确答案词） | http://aixinjp.com/a/lianxifangshi/zhentidaan/2024/0708/1143.html | ✅ Q7-13 答案（2・4・4・1・1・3・2）；Q8=返上4 与第六时限=2 相左，判定 4 | - |
 | 2026-09-07 | 2024-07 N1 問題2 Q13 题干+4选项（骨折り/足手まとい/裏目/および腰） | https://nihongoaz.com/jlpt-n1-vocabulary-practice-test-30.html | ✅ 与 learnjapaneseaz 同源互证，答案=足手まとい | - |
 | 2026-09-07 | 2024-07 N1 語彙・文法・読解 逐题（越南语题面，可核对 Q13 题干） | https://trynihongo.com/ja/de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-07-2024-q1353 | 参照（在线，未存档） | - |
+| 2026-09-07 | 問題2 Q7-13 学习材料语注生成（正解7词＋干扰项21词）：MOJi辞書 | https://www.mojidict.com （本地 moji CLI，音频→~/moji_audio） | 逐词查询 → analysis/2024-07-vocab-context-words.md | - |
+| 2026-09-07 | 問題2 Q7-13 学习材料例句/截图/音频：Nadeshiko | https://nadeshiko.co （本地 nadeshiko CLI） | SAFE 优先；繰り越す/低迷 无台词、および腰仅1条 | - |
+| 2026-09-07 | 「足手まとい」标准读法确认 | コトバンク(大辞泉/精選版)・weblio | ✅ 通行读法 あしてまとい（「あしでまとい」とも）；moji 表记为 あしでまとい④ | www.kotobank.jp/word/足手纏い-424568 |
 
 ## 结论标记
 
