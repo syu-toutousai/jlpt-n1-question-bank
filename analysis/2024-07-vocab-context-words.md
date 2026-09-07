@@ -340,7 +340,7 @@
 
 ### 【干扰项】查缺补漏
 
-### じわじわ　干扰项
+### じわじわ（じわじわ）　干扰项
 
 - **释义**：一点一点地，徐徐地，逐渐
 - **辨析**：表「缓慢推移」的时间副词，不表人声嘈杂。
@@ -352,7 +352,7 @@
     - ≪Dr. STONE: STONE WARS≫ EP1 @ 0:33 [SAFE]　https://nadeshiko.co/en/sentence/acfdbIdx_moB
     - https://cdn.nadeshiko.co/media/113936/1/170aa1b8dd.mp3  🖼 https://cdn.nadeshiko.co/media/113936/1/170aa1b8dd.webp
 
-### どろどろ　干扰项
+### どろどろ（どろどろ）　干扰项
 
 - **释义**：粘糊糊；沾满泥；也指(雷)隆隆
 - **辨析**：表粘稠/混浊状态，不表众人的说话声。
@@ -364,7 +364,7 @@
     - ≪Kanon (2006)≫ EP6 @ 18:11 [SAFE]　https://nadeshiko.co/en/sentence/wF7G_elAdMN1
     - https://cdn.nadeshiko.co/media/1530/6/9abbbd722c.mp3  🖼 https://cdn.nadeshiko.co/media/1530/6/9abbbd722c.webp
 
-### べたべた　干扰项
+### べたべた（べたべた）　干扰项
 
 - **释义**：粘糊糊；厚厚地涂抹；（人）腻乎乎
 - **辨析**：表粘腻状态，同样不表人声嘈杂。

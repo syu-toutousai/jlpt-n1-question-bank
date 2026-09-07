@@ -5,8 +5,27 @@ Multiple analysis files map to exam 区分 (問題1…問題13・聴解). Each m
 file is rendered inside a <section class="bunrui" id="sec-<sid>"> and appears
 in the top navigation; 区分 without a material show up as disabled chips.
 """
+import base64
+import glob
+import os
 import re
+from functools import lru_cache
 from pathlib import Path
+
+# Cards whose MOJi-Dictionary spelling differs from the card heading word
+# (card word → MOJi query spelling, used to locate the word-pron TTS file).
+CARD_QUERY = {"および腰": "及び腰"}
+
+MOJI_WORD_AUDIO = os.path.expanduser("~/moji_audio")
+
+
+@lru_cache(maxsize=None)
+def wpron(word):
+    for spelling in (word,) + (CARD_QUERY.get(word, ()),):
+        hits = glob.glob(os.path.join(MOJI_WORD_AUDIO, f"{spelling}_*_w_*.mp3"))
+        if hits:
+            return sorted(hits)[0]
+    return None
 
 ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS = ROOT / "analysis"
@@ -76,6 +95,16 @@ def render(lines, qbase, answers=frozenset()):
     cur = None
     open_detail = False
 
+    def say_html(word):
+        mp3 = wpron(word)
+        if not mp3:
+            return None
+        with open(mp3, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        return ('<div class="sayrow"><span class="saylbl">辞典発音</span>'
+                f'<audio controls preload="none" '
+                f'src="data:audio/mpeg;base64,{b64}"></audio></div>')
+
     def close_card():
         nonlocal open_detail
         if open_detail:
@@ -113,12 +142,14 @@ def render(lines, qbase, answers=frozenset()):
             if t.startswith("【干扰项】"):
                 body.append('<div class="dist-h">⚑ 干扰项 查缺补漏（错误选项 → 辨析）</div>')
                 continue
+            is_dist = "　" in t
+            if is_dist and "（" not in t and t.endswith("　干扰项"):
+                t = t[:-4]
             m = re.match(r"(.+?)（([^）]+)）", t)
             word = m.group(1) if m else t
             yomi = m.group(2) if m else ""
             word_idx += 1
             cards += 1
-            is_dist = "　" in t
             ans_flag = word in answers and not is_dist
             if is_dist:
                 dist += 1
@@ -131,6 +162,9 @@ def render(lines, qbase, answers=frozenset()):
                 f'</summary><div class="cbody">')
             open_detail = True
             cur = body
+            s = say_html(word)
+            if s:
+                body.append(s)
             continue
         if cur is None:
             continue
@@ -267,6 +301,9 @@ details.card[open]>summary{{border-bottom:1px solid var(--line);background:var(-
 .tag.ok+.tag{{margin-left:10px}}
 .cbody{{padding:4px 18px 16px}}
 .cbody p,.cbody div{{margin:7px 0;font-size:14px}}
+.sayrow{{display:flex;align-items:center;gap:10px;margin:10px 0 14px}}
+.saylbl{{flex:none;font-size:12.5px;font-weight:700;color:var(--acc);border:1px solid var(--line);border-radius:20px;padding:3px 10px;background:var(--bg2)}}
+.sayrow audio{{height:36px;width:min(280px,78%);border-radius:18px}}
 .kv b{{color:var(--acc)}}
 .note-p{{background:var(--acc2);border-radius:8px;padding:6px 10px;font-size:13px}}
 .drain{{color:#7f2ff7}}
@@ -324,7 +361,8 @@ secs.forEach(s=>io.observe(s));
 </body>
 </html>"""
     OUT.write_text(html, encoding="utf-8")
-    print(f"WROTE {OUT}  [{total_cards}] cards ({total_dist} distractor) across {len(ready)}/{len(MATERIALS)} materials, {len(html)//1024} KB")
+    say_count = html.count("data:audio/mpeg;base64,")
+    print(f"WROTE {OUT}  [{total_cards}] cards ({total_dist} distractor) across {len(ready)}/{len(MATERIALS)} materials, {len(html)//1024} KB, {say_count} 辞典発音 embeds")
 
 
 def json_answers(answers):
