@@ -86,7 +86,7 @@ def play_ctrl(src, title=""):
 
 def audio_row(label, src):
     return (f'<div class="sayrow"><span class="saylbl">{esc(label)}</span>'
-            f'{play_ctrl(src, label)}')
+            f'{play_ctrl(src, label)}</div>')
 
 ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS = ROOT / "analysis"
