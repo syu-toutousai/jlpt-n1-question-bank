@@ -81,9 +81,21 @@ def autolink(s):
     return re.sub(r"https?://[^\s\u3000]+", repl, s)
 
 
+KAN_CLUSTER = r"[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\u3005\u3006\u3007々〆〇]+"
+KANA_RUN = r"[ぁ-ゖァ-ヺー・ゝゞ]+"
+FURIGANA_RE = re.compile(r"(" + KAN_CLUSTER + r")\((" + KANA_RUN + r")\)")
+
+
+def rubify(s):
+    # Convert inline 漢字(かな) furigana (half-width parens, the nadeshiko /
+    # MOJi annotion style) into HTML ruby 注音. Full-width （…） is left as-is.
+    return FURIGANA_RE.sub(lambda m: f"<ruby>{m.group(1)}"
+                                       f"<rt>{m.group(2)}</rt></ruby>", s)
+
+
 def fmt_inline(s):
     s = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
-    return autolink(s)
+    return autolink(rubify(s))
 
 
 def render(lines, qbase, answers=frozenset()):
@@ -301,6 +313,8 @@ details.card[open]>summary{{border-bottom:1px solid var(--line);background:var(-
 .tag.ok+.tag{{margin-left:10px}}
 .cbody{{padding:4px 18px 16px}}
 .cbody p,.cbody div{{margin:7px 0;font-size:14px}}
+.cbody ruby{{color:var(--ink)}}
+.cbody rt{{font-size:.55em;color:var(--sub);font-weight:700}}
 .sayrow{{display:flex;align-items:center;gap:10px;margin:10px 0 14px}}
 .saylbl{{flex:none;font-size:12.5px;font-weight:700;color:var(--acc);border:1px solid var(--line);border-radius:20px;padding:3px 10px;background:var(--bg2)}}
 .sayrow audio{{height:36px;width:min(280px,78%);border-radius:18px}}
