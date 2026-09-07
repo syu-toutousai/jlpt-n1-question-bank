@@ -70,12 +70,23 @@ def exam_audio(word, sentence):
 
 def datauri(path):
     with open(path, "rb") as fh:
-        return base64.b64encode(fh.read()).decode()
+        return "data:audio/mpeg;base64," + base64.b64encode(fh.read()).decode()
+
+
+def play_ctrl(src, title=""):
+    # Compact icon-only audio play button (replaces the browser control bar).
+    tt = f' title="{esc(title)}"' if title else ""
+    return ('<span class="psay"><button class="pbtn" '
+            f'aria-label="播放"{tt}>'
+            '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">'
+            '<path class="ic-play" d="M8 5.5v13l11-6.5z"/>'
+            '<path class="ic-stop" d="M6 6h4v12H6zM14 6h4v12h-4z" style="display:none"/></svg>'
+            f'</button><audio preload="none" src="{src}"></audio></span>')
 
 
 def audio_row(label, src):
     return (f'<div class="sayrow"><span class="saylbl">{esc(label)}</span>'
-            f'<audio controls preload="none" src="data:audio/mpeg;base64,{src}"></audio></div>')
+            f'{play_ctrl(src, label)}')
 
 ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS = ROOT / "analysis"
@@ -280,7 +291,7 @@ def render(lines, qbase, answers=frozenset()):
                         elif u.endswith((".webp", ".png", ".jpg")):
                             img = u
                     if au:
-                        cur.append(f'<audio controls preload="none" src="{esc(au)}"></audio>')
+                        cur.append(f'<div class="sayrow">{play_ctrl(esc(au), "台词发音")}</div>')
                     if img:
                         cur.append(f'<img loading="lazy" src="{esc(img)}" alt="场景截图">')
                     if not au and not img:
@@ -385,7 +396,12 @@ details.card[open]>summary{{border-bottom:1px solid var(--line);background:var(-
 .sayrow{{display:flex;align-items:center;gap:10px;margin:10px 0 14px}}
 .saylbl{{flex:none;font-size:12.5px;font-weight:700;color:var(--acc);border:1px solid var(--line);border-radius:20px;padding:3px 10px;background:var(--bg2)}}
 .saylbl.off{{color:var(--sub);font-weight:600}}
-.sayrow audio{{height:36px;width:min(280px,78%);border-radius:18px}}
+.psay{{display:inline-flex;align-items:center}}
+.psay audio{{width:1px;height:1px;position:absolute;opacity:0;pointer-events:none}}
+.pbtn{{flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--acc);background:var(--acc2);color:var(--acc);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:transform .12s ease,background .12s ease;padding:0}}
+.pbtn:hover{{background:var(--acc);color:#fff;transform:scale(1.07)}}
+.pbtn.on{{background:var(--acc);color:#fff;animation:pulse 1.4s ease infinite}}
+@@keyframes pulse{{0%,100%{{box-shadow:0 0 0 0 rgba(79,110,247,.45)}}50%{{box-shadow:0 0 0 7px rgba(79,110,247,0)}}}}
 .kv b{{color:var(--acc)}}
 .note-p{{background:var(--acc2);border-radius:8px;padding:6px 10px;font-size:13px}}
 .drain{{color:#7f2ff7}}
@@ -394,7 +410,6 @@ details.card[open]>summary{{border-bottom:1px solid var(--line);background:var(-
 .s-h{{font-size:15.5px;margin-top:12px!important}}
 .m-ico{{margin-right:6px}}
 .rare{{color:#e8590c;font-size:13px;background:#fff8f2;border-radius:8px;padding:6px 10px}}
-audio{{width:100%;max-width:420px;height:40px;display:block;margin:8px 0}}
 img{{max-width:280px;width:100%;border-radius:10px;border:1px solid var(--line);margin:6px 0;display:block;cursor:zoom-in}}
 img:active{{transform:scale(1.6);transform-origin:top left;cursor:zoom-out}}
 .linkline{{word-break:break-all;font-size:12.5px}}
@@ -439,6 +454,33 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{{
  chips.forEach(c=>c.dataset.cur=c.getAttribute('href')==='#'+e.target.id?'1':'0');
 }}),{{rootMargin:'-40% 0px -55% 0px'}});
 secs.forEach(s=>io.observe(s));
+// icon-only audio player: one source at a time, toggle play/stop
+const pbtns=[...document.querySelectorAll('.pbtn')];
+const PLAY_SVG='<path class="ic-play" d="M8 5.5v13l11-6.5z"/><path class="ic-stop" d="M6 6h4v12H6zM14 6h4v12h-4z" style="display:none"/>';
+const STOP_SVG='<path class="ic-play" d="M8 5.5v13l11-6.5z" style="display:none"/><path class="ic-stop" d="M6 6h4v12H6zM14 6h4v12h-4z"/>';
+function off(b){{
+ b.classList.remove('on');
+ const svg=b.querySelector('svg');svg.innerHTML=PLAY_SVG;
+ const a=b.parentNode.querySelector('audio');if(a)a.pause();
+}}
+let cur=null;
+document.addEventListener('click',e=>{{
+ const btn=e.target.closest('.pbtn');if(!btn)return;
+ const a=btn.parentNode.querySelector('audio');if(!a)return;
+ if(cur&&cur!==btn)off(cur);
+ if(a.paused){{
+  a.play();btn.classList.add('on');
+  const svg=btn.querySelector('svg');svg.innerHTML=STOP_SVG;
+  cur=btn;
+ }}else{{
+  off(btn);cur=null;
+ }}
+}});
+document.addEventListener('ended',e=>{{
+ if(cur&&e.target===cur.parentNode.querySelector('audio')){{
+  off(cur);cur=null;
+ }}
+}},true);
 </script>
 </body>
 </html>"""
