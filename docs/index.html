@@ -227,7 +227,6 @@ function ansIndex(a){a=String(a||'').toUpperCase();
  if(/^[A-D]$/.test(a))return a.charCodeAt(0)-65;return -1;}
 function keyLabel(i){return String(i+1);}
 
-const CARDCARD={'取り次いで':'取り次ぐ'};
 function card(q,idx){
   const src=`${q.year}年${q.month}月 · ${SECTION_LABEL[q.section]||q.section} · ${TYPEMAP[q.section+'-'+q.type]||q.type} · 第${q.number}題`;
   const d=DIFF[q.difficulty]||DIFF.medium;
@@ -236,10 +235,9 @@ function card(q,idx){
     && ((q.type==='reading' && [1,2,3,4,5,6].indexOf(Number(q.number))>-1)
      || (q.type==='context' && [7,8,9,10,11,12,13].indexOf(Number(q.number))>-1));
   const ext= isMat?`<a class="ext" href="vocab-words.html#q${q.number}" target="_blank" title="跳转到对应小问的学习材料">📖 扩展</a>`:'';
-  const wCard=w=>CARDCARD[w]||w;
   const opts=(q.options||['','','','']).map((o,i)=>
     `<div class="opt" data-i="${i}" data-ok="${ansIndex(q.answer)===i?1:0}">`+
-    `<span class="k">${keyLabel(i)}</span><span class="tx">${isMat&&ansIndex(q.answer)===i?`<a class="extw" href="vocab-words.html#w-${encodeURIComponent(wCard(o))}" target="_blank" title="查看正解词条卡片">${o||''}</a>`:o||''}</span></div>`).join('');
+    `<span class="k">${keyLabel(i)}</span><span class="tx">${o||''}</span></div>`).join('');
   const div=document.createElement('div');
   div.className='qcard';
   div.style.setProperty('--c',SECTION_COLOR[q.section]||'#7a4ff7');
