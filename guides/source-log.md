@@ -31,6 +31,11 @@
 | 2026-09-08 | 2024年12月 N1 答案（第六时限）——页面正文无答案内容 | https://www.diliushixian.com/information/4519.html | ⚠️ 空页（未发布答案），仅存档 | refs/2024-12_answerkey_diliushixian.html |
 | 2026-09-08 | 2024年12月 N1 答案（沪江语法/读解） | https://jp.hujiang.com/nenglikaon1/p1443106/ 、 m.hujiang.com/jp_nenglikaoN1/p1443108/ | ⚠️ 页面无正文（仅导航，JS渲染），未采用 | refs/2024-12_answerkey_hujiang_gram.html |
 | 2026-09-08 | 2024年12月 N1 答案（nihongoaz / 新干线） | https://nihongoaz.com/jlpt-n1-12-2024.html 、 https://www.xgxedu.com/html/kszx/6401.html | ⚠️ 无正文（JS渲染/GBK图片），未采用 | refs/2024-12_answerkey_nihongoaz.html 、 refs/2024-12_answerkey_xgxedu.html |
+| 2026-09-08 | 常用漢字表 本表 2136字（字種・音訓・例・備考，H22内閣告示） | https://www.bunka.go.jp/kokugo_nihongo/sisaku/joho/joho/kijun/naikaku/kanji/joyokanjisakuin/index.html | ✅ 公表HTML、Shift_JIS、2136行；生成 data/joyo-kanji-2136.json 的元数据（例=音訓索引原文，弥/朕/阜等が例無し、極 は〔副〕を例に合流） | refs/joyo_kanji_sakuin_bunkacho.html |
+| 2026-09-08 | 学年（教育漢字1026字）＝文部科学省 H29 学習指導要領 学年別漢字配当表 | https://fragment-database.com/kanji.html | ✅ 1年80/2年160/3年200/4年202/5年193/6年191（計1026）；残り1110字→中学(7)。Wikipedia 常用漢字一覧 と学年0差分 | refs/joyo_gakunenbetsu_haitou_fragment-db.html |
+| 2026-09-08 | 総画数＝Unicode UCD Unihan kTotalStrokes（国際基準） | https://www.unicode.org/Public/15.1.0/ucd/Unihan.zip | ✅ 2136/2136 全収録；日本の辞書画数（以=5画など）と175字で相違（meta.caveats に記載） | refs/unihan/ |
+| 2026-09-08 | 部首＝Unicode UCD 8.0 Unihan kRSKangXi（康熙214部首） | https://www.unicode.org/Public/8.0.0/ucd/Unihan.zip | ✅ 2136/2136 全収録；部首名は康熙214部首表（日本語常用形） | refs/unihan8/ |
+| 2026-09-08 | 独立クロスチェック：ja.wikipedia 常用漢字一覧（部首/総画/学年） | https://ja.wikipedia.org/wiki/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97%E4%B8%80%E8%A6%A7 | ✅ 学年0差分；部首名は大体KangXi一致（ウィキの部首帰属に方言あり医→酉等）；画数の JP 流は UCD と175字相違（上述 caveat 根拠） | - |
 
 ## 结论标记
 
@@ -43,3 +48,10 @@
 1. 下载/截图版权材料 → `refs/`（文件名格式：`YYYY-MM_科目_来源.ext`）
 2. 在本表追加一行：范围、URL、结论、refs 文件名
 3. 若某来源已失效，保留记录并将 URL 标记为「失效」
+
+## 衍生数据（無版权・可入库）
+
+| 日期 | 范围 | 来源 | 结论 | 本地文件 |
+|------|------|------|------|----------|
+| 2026-09-08 | 2024-07+2024-12 全问题バンク 162 问 漢字走査（语幹/选项/正解/読解パッセージ/聴解原文・カナ行のみ） | `past-exams/**/*.json`（自録） | 1070 字（語彙480・文法394・読解754・聴解570），表外 23 字 | `joyokanjihyo-annotated/data/kanji_labels.json` |
+| 2026-09-08 | 表外漢字 23 字の音・訓（付録用） | Unihan 8.0 `kJapaneseKun` / `kJapaneseOn`（`refs/unihan8/Unihan_Readings.txt`） | 例（问题バンクの実例）とともに `tools/annotate_pdf.py::EXTRA` に反映 | `refs/unihan8/Unihan_Readings.txt` |
