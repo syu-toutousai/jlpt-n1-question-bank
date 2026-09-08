@@ -71,10 +71,90 @@ def split_sent(text: str):
     return out
 
 
+NOTE_RE = re.compile(r"[（(]注[\d０-９]+[）)]")
+CHUURYAKU = re.compile(r"[（(]中略[）)]")
+
+
+def degloss(s: str) -> str:
+    out, rest = [], s
+    while True:
+        m = NOTE_RE.search(rest)
+        if not m:
+            out.append(rest)
+            break
+        out.append(rest[:m.start()])
+        ne = NOTE_RE.search(rest[m.end():])
+        body_end = m.end() + ne.start() if ne else len(rest)
+        body = rest[m.end():body_end]
+        if ":" in body or "：" in body:
+            stem = re.search(r"\d{1,2}\s*[.．]\s*[^。]*(?:。|$)", body)
+            if stem:
+                out.append(stem.group(0))
+        else:
+            out.append(rest[m.start():body_end])
+        rest = rest[body_end:]
+    return re.sub(r"\s+", " ", CHUURYAKU.sub("", NOTE_RE.sub("", "".join(out)))).strip()
+
+
 def clean(s: str) -> str:
     s = LEAD.sub("", s or "")
+    s = s.replace("変 わる", "変わる")
     s = re.sub(r"[_★]+", "", s)
-    return re.sub(r"\s+", " ", s).strip()
+    s = re.sub(r"\s+", " ", s)
+    return re.sub(r"(?<=\S) (?=\S)", "", s).strip()
+
+
+BLANK = re.compile(r"[（(][　\s]*[）)]|【\d+】")
+SLOT = re.compile(r"[_★＿]+")
+
+
+def fill_blank(q: str, word: str):
+    m = BLANK.search(q or "")
+    if not m:
+        return None
+    q = q[:m.start()] + word + q[m.end():]
+    return re.sub(r"\s+", " ", q).strip()
+
+
+def order_from_quote(qtext: str, opts):
+    cand, pos, out = list(opts), 0, []
+    while cand:
+        best = None
+        for o in cand:
+            i = qtext.find(o, pos)
+            if i >= 0 and (best is None or i < best[0]):
+                best = (i, o)
+        if not best:
+            return None
+        pos = best[0] + len(best[1])
+        out.append(best[1])
+        cand.remove(best[1])
+    return out
+
+
+def composition_full(d):
+    q = re.sub(r"^\d+\.\s*", "", d.get("question") or "")
+    opts = [o for o in (d.get("options") or []) if o]
+    exp = d.get("explanation") or ""
+    cands = [sm.group(1) for sm in QUOTE.finditer(exp)]
+    cands += [ln for ln in exp.splitlines() if has_kana(ln)]
+    cands += [exp]
+    for qt in cands:
+        order = order_from_quote(qt, opts)
+        if len(order) != len(opts):
+            continue
+        slots = list(SLOT.finditer(q))
+        if len(slots) != len(opts):
+            continue
+        filled, prev = "", 0
+        for (s, o) in zip(slots, order):
+            filled += q[prev:s.start()] + o
+            prev = s.end()
+        filled += q[prev:]
+        filled = re.sub(r"\s+", " ", filled).strip()
+        if has_kana(filled):
+            return filled
+    return None
 
 
 def sort_key(d):
@@ -111,31 +191,47 @@ def collect(session: str):
     files = []
     for s in ("vocab", "grammar", "reading", "listening"):
         files += list((base / s).glob("*.json"))
+    pfill = {}
+    for pf in (base / "grammar").glob("passage_*.json"):
+        pd = json.load(open(pf, encoding="utf-8"))
+        nm = int(re.search(r"\d+", pf.stem).group(0))
+        pfill[nm] = (pd.get("options") or [""] * 4)[int(pd.get("answer") or 1) - 1]
     rows, seen = [], set()
     for f in files:
         d = json.load(open(f, encoding="utf-8"))
         kind, sec = d.get("type"), d.get("section")
         texts = []
         if sec == "vocab":
-            q = clean(d.get("question") or "")
-            texts += split_sent(q)
-            if kind == "usage":
-                for o in (d.get("options") or []):
-                    s = clean(o)
-                    if has_kana(s) and len(s) >= 4:
-                        texts.append(s)
-        elif sec == "grammar" and kind in ("choice", "passage"):
-            texts += split_sent(clean(d.get("question") or ""))
+            if kind == "context":
+                f = fill_blank(d.get("question") or "",
+                               (d.get("options") or [""] * 4)[int(d.get("answer") or 1) - 1])
+                texts += split_sent(f) if f else split_sent(clean(d.get("question") or ""))
+            else:
+                q = clean(d.get("question") or "")
+                texts += split_sent(q)
+                if kind == "usage":
+                    for o in (d.get("options") or []):
+                        s = clean(o)
+                        if has_kana(s) and len(s) >= 4:
+                            texts.append(s)
+        elif sec == "grammar" and kind == "choice":
+            f = fill_blank(d.get("question") or "",
+                           (d.get("options") or [""] * 4)[int(d.get("answer") or 1) - 1])
+            texts += split_sent(f) if f else split_sent(clean(d.get("question") or ""))
         elif kind == "composition":
-            texts += split_sent(clean(d.get("question") or ""))
-            for m in QUOTE.finditer(d.get("explanation") or ""):
-                s = re.sub(r"\s+", "", m.group(1))
-                if has_kana(s) and len(s) >= 6:
+            for s in (composition_full(d),):
+                if s and has_kana(s):
                     texts.append(s)
+        elif sec == "grammar" and kind == "passage":
+            q = d.get("question") or ""
+            q = re.sub(r"(?m)^[　\s]*【\d+】[　\s]*$", "", q)
+            q = re.sub(r"【(\d+)】",
+                       lambda m: pfill.get(int(m.group(1)), m.group(0)), q)
+            texts += split_sent(clean(q))
         elif sec == "reading":
-            texts += split_sent(clean(d.get("question") or ""))
+            texts += split_sent(clean(degloss(d.get("question") or "")))
             for o in (d.get("options") or []):
-                s = clean(o)
+                s = clean(degloss(o))
                 if has_kana(s) and len(s) >= 4:
                     texts.append(s)
         elif sec == "listening":
