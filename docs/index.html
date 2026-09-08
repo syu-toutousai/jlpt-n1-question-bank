@@ -124,8 +124,8 @@ border-radius:50%;animation:sp 0.7s linear infinite;vertical-align:-2px;margin-r
     <input id="pw" type="password" placeholder="访问密码" autocomplete="off">
     <div class="err" id="err">密码错误，请重新输入</div>
     <button id="unlockBtn">解锁题库</button>
-    <div class="hint"><a href="vocab-words.html" style="color:var(--acc)">📖 公开学习材料：2024年7月 語彙 語注・例句集（免密）→</a></div>
-    <div class="hint"><a href="vocab-words-2024-12.html" style="color:var(--acc)">📖 公开学习材料：2024年12月 語彙 語注・例句集（免密）→</a></div>
+    <div class="hint"><a href="vocab-words.html" style="color:var(--acc)">📖 公开学习材料：2024年7月 全66問 語注・例句集（免密，含聴解）→</a></div>
+    <div class="hint"><a href="vocab-words-2024-12.html" style="color:var(--acc)">📖 公开学习材料：2024年12月 全66問 語注・例句集（免密）→</a></div>
     <div class="hint">密码见本地 tools/encrypt.py 生成的 site/.secret.txt</div>
   </div>
 </div>
@@ -231,16 +231,30 @@ function ansIndex(a){a=String(a||'').toUpperCase();
  if(/^[A-D]$/.test(a))return a.charCodeAt(0)-65;return -1;}
 function keyLabel(i){return String(i+1);}
 
+function listenTag(q){
+  const m=/問題(\d)\((\d+)\)/.exec(q.source||'');
+  return m?`t${m[1]}${('0'+m[2]).slice(-2)}`:'';
+}
+
 function card(q,idx){
   const src=`${q.year}年${q.month}月 · ${SECTION_LABEL[q.section]||q.section} · ${TYPEMAP[q.section+'-'+q.type]||q.type} · 第${q.number}題`;
   const d=DIFF[q.difficulty]||DIFF.medium;
   const tags=(q.tags||[]).map(t=>`<span>#${t}</span>`).join('');
-  const isMat= ((q.year===2024 && q.month===7)
-     || (q.year===2024 && q.month===12)) && q.section==='vocab'
-    && ((q.type==='reading' && [1,2,3,4,5,6].indexOf(Number(q.number))>-1)
-     || (q.type==='context' && [7,8,9,10,11,12,13].indexOf(Number(q.number))>-1));
+  const num=Number(q.number);
+  const is2024=(q.year===2024 && (q.month===7||q.month===12));
+  const isMat= is2024 && q.section==='vocab'
+    && ((q.type==='reading' && [1,2,3,4,5,6].indexOf(num)>-1)
+     || (q.type==='context' && [7,8,9,10,11,12,13].indexOf(num)>-1));
+  const hasExt= is2024 && (
+       (q.section==='vocab' && ((q.type==='reading'&&num>=1&&num<=6)
+        ||(q.type==='context'&&num>=7&&num<=13)
+        ||(q.type==='paraphrase'&&num>=14&&num<=19)
+        ||(q.type==='usage'&&num>=20&&num<=25)))
+    || (q.section==='grammar' && num>=26&&num<=44)
+    || (q.section==='reading' && num>=45&&num<=66)
+    || (q.section==='listening' && q.year===2024&&q.month===7));
   const matPage= (q.year===2024 && q.month===12)?'vocab-words-2024-12.html':'vocab-words.html';
-  const ext= isMat?`<a class="ext" href="${matPage}#q${q.number}" target="_blank" title="跳转到对应小问的学习材料">📖 扩展</a>`:'';
+  const ext= hasExt?`<a class="ext" href="${matPage}#${q.section==='listening'?listenTag(q):'q'+num}" target="_blank" title="跳转到对应小问的学习材料">📖 扩展</a>`:'';
   const opts=(q.options||['','','','']).map((o,i)=>
     `<div class="opt" data-i="${i}" data-ok="${ansIndex(q.answer)===i?1:0}">`+
     `<span class="k">${keyLabel(i)}</span><span class="tx">${o||''}</span></div>`).join('');

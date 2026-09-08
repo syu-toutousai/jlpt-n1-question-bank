@@ -55,30 +55,68 @@ BUNRUI = [
 SESSIONS = {
     "2024-07": {
         "title": "2024年7月 JLPT N1 語注・例句集",
-        "sub": "题干汉字词 × 有意义干扰项 ・ MOJi辞書 读音/释义/例句 ＋ Nadeshiko 动漫日剧真实台词",
+        "sub": "語彙 Q1–25 ＋ 文法 Q26–44 ＋ 読解 Q45–66 ＋ 聴解 全30 ・ MOJi辞書 读音/释义/例句 ＋ Nadeshiko 动漫日剧真实台词",
         "materials": [
             {"file": "2024-07-vocab-reading-words.md", "sid": "q1", "qfirst": 1,
              "label": "問題1 読み方", "sub": "Q1–6 読み方 ・ 漢字語の読み"},
             {"file": "2024-07-vocab-context-words.md", "sid": "q2", "qfirst": 7,
              "label": "問題2 文脈規定", "sub": "Q7–13 文脈規定 ・ 語を正しく判断"},
+            {"file": "2024-07-paraphrase.md", "sid": "q3", "qfirst": 14,
+             "label": "問題3 言い換え", "sub": "Q14–19 言い換え ・ 同義表現"},
+            {"file": "2024-07-usage.md", "sid": "q4", "qfirst": 20,
+             "label": "問題4 使い方", "sub": "Q20–25 使い方 ・ 文を作る"},
+            {"file": "2024-07-grammar-choice.md", "sid": "q5", "qfirst": 26,
+             "label": "問題5 文法選択", "sub": "Q26–35 文法選択 ・ 文型"},
+            {"file": "2024-07-composition.md", "sid": "q6", "qfirst": 36,
+             "label": "問題6 並べ替え", "sub": "Q36–40 並べ替え"},
+            {"file": "2024-07-grammar-passage.md", "sid": "q7", "qfirst": 41,
+             "label": "問題7 文章の文法", "sub": "Q41–44 記述問題・空欄文型"},
+            {"file": "2024-07-reading-short.md", "sid": "q8", "qfirst": 45,
+             "label": "問題8 短文読解", "sub": "Q45–48 短文読解"},
+            {"file": "2024-07-reading-mid.md", "sid": "q9", "qfirst": 49,
+             "label": "問題9 中文読解", "sub": "Q49–56 中文読解"},
+            {"file": "2024-07-reading-long.md", "sid": "q10", "qfirst": 57,
+             "label": "問題10 長文読解A", "sub": "Q57–66 長文読解"},
+            {"file": "2024-07-listening.md", "sid": "toki", "qfirst": 1,
+             "label": "聴解", "sub": "全30問 ・ 原文抜粋＋語注"},
         ],
         "answers": {
             "q1": {1: "腐敗", 2: "粗い", 3: "粘膜", 4: "寿命", 5: "戒める", 6: "誓約書"},
             "q2": {7: "根底", 8: "返上", 9: "取り次ぐ", 10: "交錯", 11: "難航", 12: "がやがや", 13: "足手まとい"},
+            "q3": {14: "任せる", 15: "爽やかな", 16: "用意する", 17: "雑な", 18: "下を向いて", 19: "ダメージ"},
+            "q4": {20: "風潮", 21: "もたらす", 22: "撤回", 23: "補填", 24: "コンスタント", 25: "ずばり"},
         },
     },
     "2024-12": {
         "title": "2024年12月 JLPT N1 語注・例句集",
-        "sub": "题干汉字词 × 有意义干扰项 ・ MOJi辞書 读音/释义/例句 ＋ Nadeshiko 动漫日剧真实台词",
+        "sub": "語彙 Q1–25 ＋ 文法 Q26–44 ＋ 読解 Q45–66 ＋ 聴解 全30 ・ MOJi辞書 读音/释义/例句 ＋ Nadeshiko 动漫日剧真实台词",
         "materials": [
             {"file": "2024-12-vocab-reading-words.md", "sid": "q1", "qfirst": 1,
              "label": "問題1 読み方", "sub": "Q1–6 読み方 ・ 漢字語の読み"},
             {"file": "2024-12-vocab-context-words.md", "sid": "q2", "qfirst": 7,
              "label": "問題2 文脈規定", "sub": "Q7–13 文脈規定 ・ 語を正しく判断"},
+            {"file": "2024-12-paraphrase.md", "sid": "q3", "qfirst": 14,
+             "label": "問題3 言い換え", "sub": "Q14–19 言い換え ・ 同義表現"},
+            {"file": "2024-12-usage.md", "sid": "q4", "qfirst": 20,
+             "label": "問題4 使い方", "sub": "Q20–25 使い方 ・ 文を作る"},
+            {"file": "2024-12-grammar-choice.md", "sid": "q5", "qfirst": 26,
+             "label": "問題5 文法選択", "sub": "Q26–35 文法選択 ・ 文型"},
+            {"file": "2024-12-composition.md", "sid": "q6", "qfirst": 36,
+             "label": "問題6 並べ替え", "sub": "Q36–40 並べ替え"},
+            {"file": "2024-12-grammar-passage.md", "sid": "q7", "qfirst": 41,
+             "label": "問題7 文章の文法", "sub": "Q41–44 記述問題・空欄文型"},
+            {"file": "2024-12-reading-short.md", "sid": "q8", "qfirst": 45,
+             "label": "問題8 短文読解", "sub": "Q45–48 短文読解"},
+            {"file": "2024-12-reading-mid.md", "sid": "q9", "qfirst": 49,
+             "label": "問題9 中文読解", "sub": "Q49–56 中文読解"},
+            {"file": "2024-12-reading-long.md", "sid": "q10", "qfirst": 57,
+             "label": "問題10 長文読解A", "sub": "Q57–66 長文読解"},
         ],
         "answers": {
             "q1": {1: "絶叫", 2: "背後", 3: "抱負", 4: "侮る", 5: "筋道", 6: "奔放"},
             "q2": {7: "適応", 8: "掲げる", 9: "踏襲", 10: "足止め", 11: "へとへと", 12: "払拭", 13: "とっさに"},
+            "q3": {14: "能力", 15: "無駄にして", 16: "いいかげん", 17: "今", 18: "引き受ける", 19: "差し上げました"},
+            "q4": {20: "加工", 21: "養う", 22: "質質", 23: "正当", 24: "ありがたい", 25: "間柄"},
         },
     },
 }
@@ -251,6 +289,16 @@ def render(lines, qbase, answers=frozenset()):
             close_card()
             title = line[3:]
             in_stem = title.startswith("题干速览")
+            mq = re.match(r"^([QT])(\d+)\t?　", title)
+            if mq:
+                # Exam-numbered sections (語彙 Q14+ / 文法 / 読解 / 聴解):
+                # anchor by the exam question number so index.html deep links
+                # (#q<n>) resolve. 聴解 uses #t<n> to avoid clashing with the
+                # vocab #q1–13 anchors already present on the same page.
+                nid = ("t" if mq.group(1) == "T" else "q") + mq.group(2)
+                body.append(f'<h2 class="sec" id="{nid}">{esc(title)} '
+                            f'<a class="qanchor" href="#{nid}">#{nid}</a></h2>')
+                continue
             if title.startswith(("题干速览", "干扰项一览", "干扰项")):
                 body.append(f'<h2 class="sec">{esc(title)}</h2>')
             else:
@@ -265,7 +313,7 @@ def render(lines, qbase, answers=frozenset()):
                 body.append('<div class="dist-h">⚑ 干扰项 查缺补漏（错误选项 → 辨析）</div>')
                 continue
             is_dist = "　" in t
-            if is_dist and "（" not in t and t.endswith("　干扰项"):
+            if is_dist and t.endswith("　干扰项"):
                 t = t[:-4]
             m = re.match(r"(.+?)（([^）]+)）", t)
             word = m.group(1) if m else t
@@ -302,9 +350,21 @@ def render(lines, qbase, answers=frozenset()):
                     cur.append(f'<p class="kv note-p">{fmt_inline(text)}</p>')
                 elif "：" in text and text.split("：")[0].startswith("**"):
                     label, rest = text.split("：", 1)
-                    if label.strip("**") == "作品台词":
+                    lkey = label.strip("**")
+                    if lkey == "作品台词":
                         cur.append(f'<p class="kv drain">{fmt_inline(text)}</p>')
-                    elif label.strip("**") == "MOJi 例句":
+                    elif lkey == "MOJi 例句":
+                        cur.append(f'<p class="kv">{fmt_inline(label)}<span>：</span>'
+                                   f'{fmt_inline(rest)}{exam_ip(cur_word, rest)}</p>')
+                    elif lkey == "听力音频":
+                        # remote exam audio (聴解原音) → nade-style play button
+                        m_u = re.search(r"https?://[^\s\u3000]+", rest)
+                        ip = ip_btn(esc(m_u.group(0)), "nade") if m_u else ""
+                        cur.append(f'<p class="kv">{fmt_inline(label)}<span>：</span>'
+                                   f'<span class="url">{fmt_inline(rest)}</span>{ip}</p>')
+                    elif lkey == "听力原文" or lkey.startswith("用法例文") \
+                            or lkey == "文法例文" or lkey == "考查句":
+                        # generated study-page lines with Edge-TTS available
                         cur.append(f'<p class="kv">{fmt_inline(label)}<span>：</span>'
                                    f'{fmt_inline(rest)}{exam_ip(cur_word, rest)}</p>')
                     else:
