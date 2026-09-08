@@ -36,6 +36,7 @@
 | 2026-09-08 | 総画数＝Unicode UCD Unihan kTotalStrokes（国際基準） | https://www.unicode.org/Public/15.1.0/ucd/Unihan.zip | ✅ 2136/2136 全収録；日本の辞書画数（以=5画など）と175字で相違（meta.caveats に記載） | refs/unihan/ |
 | 2026-09-08 | 部首＝Unicode UCD 8.0 Unihan kRSKangXi（康熙214部首） | https://www.unicode.org/Public/8.0.0/ucd/Unihan.zip | ✅ 2136/2136 全収録；部首名は康熙214部首表（日本語常用形） | refs/unihan8/ |
 | 2026-09-08 | 独立クロスチェック：ja.wikipedia 常用漢字一覧（部首/総画/学年） | https://ja.wikipedia.org/wiki/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97%E4%B8%80%E8%A6%A7 | ✅ 学年0差分；部首名は大体KangXi一致（ウィキの部首帰属に方言あり医→酉等）；画数の JP 流は UCD と175字相違（上述 caveat 根拠） | - |
+| 2026-09-08 | 2024年7月 N1 聴解フル音声（問題1-5 全30問，128kbps 51:56） | 百度网盘（用户上传 baidupcs 云端 `2013-2021年N1音频/2024年7月新日语能力考试 N1.mp3`，47.55MB） | ✅ ローカル archive のみ（refs/、gitignore・不推送）；本页聴解音声は per-Q リモートURL（jlptzhen.com 202407N10X_Y.mp3，29/29 200 OK）を引き続き使用 | refs/2024-07_listening_baidupcs.mp3 |
 
 ## 结论标记
 
