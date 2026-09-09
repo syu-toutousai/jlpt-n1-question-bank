@@ -31,7 +31,7 @@ def norm(s):
 def parse_boxes(html):
     real = []
     for mobj in re.finditer(r'id="question-(\d+)"', html):
-        seg = html[mobj.end():mobj.end() + 6000]
+        seg = html[mobj.end():mobj.end() + 20000]
         j = seg.find('<div class="q-icons-bottom"')
         body = seg[:j] if j > 0 else seg
         if "custom-option" not in body:

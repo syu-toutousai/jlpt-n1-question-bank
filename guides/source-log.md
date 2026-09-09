@@ -49,6 +49,7 @@
 | 2026-09-09 | 2019-07 书面卷 69 题全部密钥 | trynihongo 真题页 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-7-2019-q742` 出题接口服务器裁决 | ✅ 69/69 转写位置 | refs/2019-07_answer_trynihongo.json + refs/2019-07_keys.json（69 题全量重写） |
 | 2026-09-09 | 2016-12 书面卷 70 题全部密钥 | trynihongo 真题页 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-12-2016-q737` 出题接口服务器裁决 | ✅ 70/70 转写位置 | refs/2016-12_answer_trynihongo.json + refs/2016-12_keys.json（70 题全量重写） |
 | 2026-09-09 | 2016-07 书面卷 70 题全部密钥 | trynihongo 真题页 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-7-2016-q736` 出题接口服务器裁决 | ✅ 70/70 转写位置 | refs/2016-07_answer_trynihongo.json + refs/2016-07_keys.json（70 题全量重写） |
+| 2026-09-09 | 2010-07～2015-12 十二场书面卷全部密钥（2010 两场各 71 题、其余 70 题） | trynihongo 真题页 q724-q735（`de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-7/12-YYYY`）出题接口服务器裁决 | ✅ 842/842 转写位置；2011-12 Q69 首探转写缺第 4 选项（页面窗口截断所致）→ 修正窗口后 = 川村さん ④；2013-12 前 70 键（xdf 数字）与 2014-12 68 键全部由接口位置取代 | refs/<session>_answer_trynihongo.json + refs/<session>_keys.json（12 场全量重写） |
 
 ## 结论标记
 
@@ -143,3 +144,13 @@
 
 - 同 `tools/trynihongo_api.py` 流程（per-question 单页 GET 绑 token → 逐选项 POST 至 `is_correct=true`，3s 间距+15s 退避）。
 - 结果: `past-exams/2018/12/*/` 70 问、`2019/07/*/` 69 问、`2016/12/*/` 70 问、`2016/07/*/` 70 问；`organize.py sync` 后 bank = 1053 题；加密站点重建，Node roundtrip 通过（1053 可解密、七场合计在看、错误口令被拒）。
+
+## 2010-07～2015-12 十二场完整密钥（trynihongo 接口服务器裁决，全量收官）
+
+| 日期 | 范围 | 来源 | 结论 | 本地文件 |
+|------|------|------|------|----------|
+| 2026-09-09 | 2010-07 / 2010-12（各 71 题）、2011-07 / 2011-12 / 2012-07 / 2012-12 / 2013-07 / 2013-12 / 2014-07 / 2014-12 / 2015-07 / 2015-12（各 70 题） | trynihongo 真题页 q724～q735 出题接口 `check_single_question_ajax` 服务器逐选项裁决 | ✅ 842/842 转写位置；旧的 xdf 数字键（2013-12）、缺失键（2014-12 68/70）、weilan/koolearn 官方位数字键全部由接口位置取代 | refs/<session>_answer_trynihongo.json + refs/<session>_keys.json + refs/<session>_keyreport.txt（12 场） |
+
+- 工具 `tools/trynihongo_api.py` 修正：选项窗口 6000→20000 字节（2011-12 Q69 第 4 选项 川村さん 因 passage 超长图片被截断；修正后 = ④）。
+- 至此可及场次（2010-07～2019-12 三轮、2020-12、2021-12、2022 两场、2023-07、2024 两场、2025-07）书面卷答案全部齐备；2020-07 当年停考，2023-12 / 2025-12（及 2026 年）无真题来源。
+- 结果: `organize.py sync` 后 bank = 1895 题；docs/ 重建；Node roundtrip 通过（1895 可解密、按年份 2010:142 … 2025:66、错误口令被拒）。
