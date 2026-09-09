@@ -42,6 +42,7 @@
 | 2026-09-08 | jlptzhen N1 文字語彙クイズ30会場（2010-07〜2025-12、2020-07中止）25問／回、正解マーク+中国語解説、講義 HTML 存档 | https://www.jlptzhen.com（wp-sitemap-posts-post-1.xml 網羅） | ⚠️ **年份標籤不可信**：クイズ内容が実際の該当年次と一致しない場合あり。2024-12 の「N1真题在线做2024年12月」(quiz 330) は 2025 後半以降の別冊と一致せず、実物 2024-12 (jlpt247転写+aixinjp 鍵 211343…) と 0/25 不一致 → バンクへの一括 import は**撤回・全削除（2024-07除く）**。jlpt247 全文転写との照合：2022-12=25/25 完全一致、2022-07=22/25(残3は転記表記ゆれ)、2023-07=18/25(残7は表記ゆれ度合い)、2025-07=18/25。残り会場(2010-2021等)は独立資料による年次・内容監査後にだけ再 import 可 | refs/<session>_jlptzhen_vocab.html + refs/<session>_vocab_jlptzhen.json（30会場） |
 | 2026-09-08 | 上記監査後 2022-12 のみ 25/25 完全一致 → バンク利用可（但し正解=サイトマーク単独、仍待第二源） | https://www.jlptzhen.com クイズ＋refs/2022-12_jlpt247.json | ✅ 2022-12 語彙クイズは公式試験と完全一致（25/25） | refs/2022-12_vocab_jlptzhen.json |
 | 2026-09-08 | 2024-12 vocab 復旧（quiz 印字で汚染された reading_01-06 等 25 問を jlpt247転写+aixinjp/learnjapaneseaz 鍵から再生成、番号・正解整合 211343|1434213|224311|244321） | refs/2024-12_jlpt247.json + refs/2024-12_answerkey_aixinjp.html + learnjapaneseaz | ✅ 復旧完了、git 状態は quiz import 前と同一 | past-exams/2024/12/vocab/*.json |
+| 2026-09-09 | 2017-12 书面卷 70 题全部密钥（語彙・文法・読解），基于 trynihongo 出题接口逐题「服务器裁决」 | trynihongo.com 過去問 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-12-2017-q739` 的 `check_single_question_ajax` 接口 POST（每选项 `is_correct` 由服务器返回）+ refs/2017-12_key_asite.html（a-site Q1-49 短语锚）+ 帝京 scribd 快照 | ✅ 70/70（語彙 62-位置 1-19 短语定位、問題4-13 由 API 服务器验证位置；排序 Q36-40=1,4,3,2,2 与 a-site ①④③②② 吻合；问题7=41123、问题8=2432 同 a-site 数字） | refs/2017-12_answer_trynihongo.json + refs/2017-12_keys.json（70 题） |
 
 ## 结论标记
 
@@ -103,3 +104,13 @@
 - 方法：`tools/keymap.py` 新管线——jlptzhen 键与转写选项**文本匹配**求位置（应对 trynihongo 洗牌），前途页 per-question 文本定位 + 排列/数字兜底；蔚蓝逐题数字与 qiantu 文本在 45-68 全部吻合（除 Q58，文本判断胜出）。
 - 注：问题4 Q24 weilan=4 系笔误（取 3 収容，jlptzhen=qiantu 双源）；问题6 为**并べ替え**题，键 4 2 4 3 1 为该空位序。
 - 结果: `past-exams/2020/12/*/` 68 问；`generate_paper.py` 新增 legacy（trynihongo+keymap keys）输入管线；`organize.py sync` 后 bank = 565 题（加密站点 docs/ 同步重建，Node roundtrip 验证通过）。
+
+## 2017-12 完整密钥（70 题，trynihongo 出题接口服务器裁决 + a-site 短语锚）
+
+| 日期 | 范围 | 来源 | 结论 | 本地文件 |
+|------|------|------|------|----------|
+| 2026-09-09 | 2017-12 书面卷 70 题 | trynihongo.com 真题页 `https://trynihongo.com/ja/de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-12-2017-q739`（出题接口 `POST /quiz/check_single_question_ajax`，POST `_token/question_id/answer_id/selected_fraction=1`，对每个选项返回服务器 `is_correct`，等同答题提交裁决）+ a-site `http://www.a-site.cn/article/1605966.html`（Q1-49 答案短语逐题锚）+ 帝京 scribd 快照（文法 26-35 选项文、排序全序）+ jlptzhen 词组 quiz Q1-25 | ✅ 键 114323\|4231242\|432132\|241413\|124333\|4112\|14322(并べ替え)\|41123\|2432\|313214412\|3414\|42\|1323\|13；全部 70 题答案文本逐题回填配对到转写选项（transcript 位置），排序 Q36-40=1,4,3,2,2 与 a-site ①④③②② 全合；问题7=41123、问题8=2432 同 a-site 数字 | `refs/2017-12_answer_trynihongo.json`（逐题 answer_pos+answer_text+answer_id）+ `refs/2017-12_keys.json`（70 题） |
+
+- 方法：trynihongo 真题页每题一个 DOM 盒，选项带 `data-question-id`/`data-answer-id`；出题接口对每个答案选项返回 `{data:{is_correct}}` → 唯一的正确选项即答案。因 passage 盒与试题盒会占用相同 DOM id（如 `question-57`），编号须按「文档序中带选项的真实盒」重排（第 k 个真实盒 = 第 k 题）。接口对突发访问限速（`Server error`），用单页 GET 绑定 CSRF token、逐题 4s 间隔、失败 20-25s 退避后重绑，35 题全部命中。
+- 交叉核验：1-19 语汇答案短语与 a-site/jpedo 读音、jlptzhen 键互证；20-31 与 a-site 问题4/5 短语全合；32-35 与 a-site ④①②② 全合；36-40 与 a-site ①④③②② 全合；41-49 与 a-site「41123」「②④③②」全合（41-45=4,1,1,2,3 即 41123）。50-70 读解无 a-site 覆盖，全部由接口服务器裁决 + 答案文本与转写选项逐句回填。
+- 结果: `past-exams/2017/12/*/` 70 问（0 警告）；`organize.py sync` 后 bank = 635 题；加密站点 docs/ 重建，Node roundtrip 验证通过（635 题可解密、2017-12 70 题在位、错误口令被拒）。

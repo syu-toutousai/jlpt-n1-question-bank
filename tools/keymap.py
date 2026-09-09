@@ -161,6 +161,47 @@ def digit_to_keylist(blocks):
     return out
 
 
+def parse_weilan_digits(text, session):
+    """Parse weilanliuxue '参考答案' digit pages (position-based official keys).
+
+    Layout per section: '问题N' header, question-number rows ('NN问', individual
+    digits may be split from '问' by HTML tags), then a run of answer-digit lines.
+    Answers are the [1-4] tokens after the last '问' marker (or the whole run for
+    sections with no number rows). Returns {(sec, a, b): [digits]} per section."""
+    rng = official_ranges(session)
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    sec = None
+    cur = []
+    secs = []
+    for idx, l in enumerate(lines):
+        m = re.match(r"^(问题|問)\s*(\d{1,2})$", l)
+        if m:
+            if sec:
+                secs.append((sec, cur))
+            sec = int(m.group(2))
+            cur = []
+        else:
+            cur.append(l)
+    if sec:
+        secs.append((sec, cur))
+    out = {}
+    for sec, toks in secs:
+        a, b = rng.get("問題%d" % sec)
+        if not a:
+            continue
+        n = b - a + 1
+        last_q = -1
+        for i, t in enumerate(toks):
+            if re.fullmatch(r"\d{1,2}问?", t) and not re.fullmatch(r"[1-4]", t):
+                last_q = i
+        slice_from = max(last_q + 1, 0) if last_q >= 0 else 0
+        cand = [t for t in toks[slice_from:] if re.fullmatch(r"[1-4]", t)]
+        digs = cand[-n:] if len(cand) >= n else cand
+        if digs and len(digs) == n:
+            out[(sec, a)] = [int(d) for d in digs]
+    return out
+
+
 def parse_inline_answers(html_files):
     """Parse koolearn-style full paper pages: question line then options 1..4 then '(4)'."""
     out = {}
@@ -329,8 +370,16 @@ def build_keys(s, tn_by):
         txt2 = re.sub(r"<script.*?</script>", "", txt, flags=re.S)
         txt2 = re.sub(r"<style.*?</style>", "", txt2, flags=re.S)
         txt2 = re.sub(r"<[^>]+>", "\n", txt2)
-        blocks = parse_digit_layout(txt2)
-        dmap = digit_to_keylist(blocks) if blocks else {}
+        if re.search(r"weilan", os.path.basename(f)):
+            blocks = None
+            wl = parse_weilan_digits(txt2, s)
+            dmap = {}
+            for (sec, a), digs in wl.items():
+                for i, d in enumerate(digs):
+                    dmap[a + i] = d
+        else:
+            blocks = parse_digit_layout(txt2)
+            dmap = digit_to_keylist(blocks) if blocks else {}
         for qn, d in dmap.items():
             if qn in tn_by and qn not in keys and qn <= 70:
                 keys[qn] = {"ans": str(d), "source": "digits-" + os.path.basename(f), "note": "official-pos"}
