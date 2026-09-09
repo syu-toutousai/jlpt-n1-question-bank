@@ -181,6 +181,21 @@ VERIFY = {
     ("2021-12", "問題11"): ("matched", "键 223；答案句吻合选项文本"),
     ("2021-12", "問題12"): ("matched", "键 423；答案句吻合选项文本"),
     ("2021-12", "問題13"): ("matched", "键 22；Q69 单源(aixinjp 读原图表),选项文本系其自选句"),
+    # 2020-12 — 68题；键 keymap(问题1-4 jlptzhen 文本 19+5+1, 问题5-13 前途 qiantu 文本+digit+sort);
+    #   读解段 weilan(exams.weilanliuxue 21250) 逐题数字交叉一致; 转写选项 shuflle-safe(文本定位)
+    ("2020-12", "問題1"): ("matched", "键 213414：jlptzhen文本=qiantu文本=weilan 全符"),
+    ("2020-12", "問題2"): ("matched", "键 4221423：jlptzhen/qiantu/weilan 全符"),
+    ("2020-12", "問題3"): ("matched", "键 423213：三源全符"),
+    ("2020-12", "問題4"): ("matched", "键 124133：jlptzhen/qiantu 全符；Q24 weilan=4 系笔误(取 3 収容)"),
+    ("2020-12", "問題5"): ("matched", "键 4344132233：qiantu文本 26-35 全符；Q32=2 対戦してくる 转写位置"),
+    ("2020-12", "問題6"): ("matched", "★ 42431：qiantu 排列 2,3,1,4等×5 转写逐序一致"),
+    ("2020-12", "問題7"): ("matched", "键 2123：qiantu文本 41-44 全符"),
+    ("2020-12", "問題8"): ("matched", "键 2311：qiantu文本=weilan 45-48"),
+    ("2020-12", "問題9"): ("matched", "键 412313132：qiantu文本=weilan 49-57 全符"),
+    ("2020-12", "問題10"): ("matched", "键 242；Q58=2 约五亿年前~急增后减少又增加(文本三源核对:weilan=4/qiantu=3 位置均不合文案)"),
+    ("2020-12", "問題11"): ("matched", "键 44：qiantu=weilan 61-62"),
+    ("2020-12", "問題12"): ("matched", "键 4321：qiantu=weilan 63-66"),
+    ("2020-12", "問題13"): ("matched", "键 33：qiantu=weilan 67-68"),
 }
 VERIFY_SOURCES = {
     "2024-07": ["refs/2024-07_full_jlptzhen.json (jlptzhen quiz)",
@@ -212,6 +227,11 @@ VERIFY_SOURCES = {
     "2021-12": ["refs/2021-12_jlpt247.json (jlpt247 全文転写 69题,問題9=49-57×9等非标准分节)",
                 "refs/2021-12_answerkey_nbry.html (aixinjp 69题 键+重建句;読解题逐句吻合选项文本)",
                 "第六时限同年N1答案页 (回忆版,問題1-5多处与 aixinjp 分歧,经选项文本核实取 aixinjp)"],
+    "2020-12": ["refs/2020-12_trynihongo.json (trynihongo 全文転写 68题)",
+                "refs/2020-12_keys.json + refs/2020-12_keyreport.txt (keymap 键:问题1-4 jlptzhen 文本为主,问题5-13 前途页 qiantu,转写位置对齐)",
+                "refs/2020-12_key_xdfqiantu.html (前途 逐题答案+解析+选项文本,问题6排列 2,3,1,4等×5,答案句逐句吻合)",
+                "refs/2020-12_vocab_jlptzhen.json (jlptzhen 25问 问题1-4 键+文本)",
+                "refs/2020-12_key_weilan.html (蔚蓝 逐题数字键:问题1-6 与 jlptzhen/qiantu 一致,读解45-68 与 qiantu 文本全符)"],
 }
 FLAG_TEXT = {"(2024-07, 54)": "⚠️ 答案争议：jlptzhen=2「常に客観視…」 vs 羊驼=3「正義に結びつける」 — 待用户确认"}
 
@@ -386,12 +406,23 @@ def main():
     FORCE = args.force
     session = args.session
     year, month = (int(x) for x in session.split("-"))
-    ref = REFS / f"{session}_full_jlptzhen.json"
+    src_label = "full_jlptzhen"
+    for label in ("full_jlptzhen", "jlpt247", "trynihongo"):
+        if (REFS / f"{session}_{label}.json").exists():
+            src_label = label
+            break
+    ref = REFS / f"{session}_{src_label}.json"
     if not ref.exists():
-        ref = REFS / f"{session}_jlpt247.json"
-    if not ref.exists():
-        print(f"! missing refs for {session} — run tools/fetch_jlptzhen.py / fetch_jlpt247.py first")
+        print(f"! missing refs for {session} — run tools/fetch_jlptzhen.py / fetch_jlpt247.py / fetch_trynihongo.py first")
         sys.exit(1)
+    from_trynihongo = src_label == "trynihongo"
+    legacy_keys = {}
+    keys_path = REFS / f"{session}_keys.json"
+    if from_trynihongo:
+        if not keys_path.exists():
+            print(f"! {session} has no refs/{session}_keys.json — run tools/keymap.py {session} first")
+            sys.exit(1)
+        legacy_keys = json.load(open(keys_path, encoding="utf-8"))
     refs_tag = ref.name
     data = json.load(open(ref, encoding="utf-8"))
     off = section_offsets()
@@ -435,24 +466,38 @@ def main():
         # written block
         idx["written"] += 1
         pos = idx["written"]
-        num = q["num"] if q["num"] is not None else find_num_from_stem(q["stem"])
-        if num is None:
-            num = off[sname] + pos - 1
+        if from_trynihongo:
+            num = int(q["num"])
         else:
-            expected = off[sname] + pos - 1
-            if num != expected:
-                summary["warns"].append(
-                    f"{sname} qid{q['qid']}: site num={num}, expected {expected} (official numbering "
-                    f"assumes complete groups; verify against the paper)")
+            num = q["num"] if q["num"] is not None else find_num_from_stem(q["stem"])
+        if not from_trynihongo:
+            if num is None:
+                num = off[sname] + pos - 1
+            else:
+                expected = off[sname] + pos - 1
+                if num != expected:
+                    summary["warns"].append(
+                        f"{sname} qid{q['qid']}: site num={num}, expected {expected} (official numbering "
+                        f"assumes complete groups; verify against the paper)")
         target = q.get("target") or ""
         opts = list(q["options"])
         stem = re.sub(r"^[．.。]\s*", "", (q["stem"] or "").strip())
         if rtype == "usage" and target in (".", "。") and stem:
             target = stem
 
-        # resolve the answer digit (jlpt247 carries no correct marker)
+        # resolve the answer digit (jlpt247 / trynihongo carry no correct marker)
         answer = q["answer"]
         note = ""
+        if from_trynihongo:
+            k = legacy_keys.get(str(num))
+            if k is None:
+                summary["warns"].append(f"{sname} Q{num}: 无答案来源，跳过写入")
+                continue
+            answer = int(k["ans"])
+            note = f"[{k['source']}] {k.get('note','')}".rstrip()
+            an = ANSWER_NOTES.get((session, num), "")
+            if an:
+                note = (note + " " if note else "") + an
         if answer in (None, ""):
             ao = ANSWER_OVERRIDES.get(session, {}).get(num)
             if ao is None:

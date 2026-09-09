@@ -93,3 +93,13 @@
 - 注：两年次的 問題1 键以存档全键为准（放下方误读先例，2022-12 問題1=324143 即 Q1 かんとく 等读音键）。
 - 争议说明（2021-12 vs 第六时限回忆版）：問題1 Q3 錯覚=さっかく(aixinjp) 非时限的 视觉(視覚)；Q54/55/57 时限答案均被选项文本核验推翻；其余問題2-5 亦有零星年限回忆差异，均以 aixinjp 重建句为准。
 - 结果: `past-exams/2022/07/*/` 68 问、`2022/12/*/` 66 问、`2021/12/*/` 69 问，合计 +203；`ANSWER_OVERRIDES/VERIFY/VERIFY_SOURCES/ANSWER_NOTES[2022-07|2022-12|2021-12]` 落盘；`organize.py sync` 后 bank = 497 题。
+
+## 2020-12 完整密钥（68 题，keymap 文本定位 + 蔚蓝交叉）
+
+| 日期 | 范围 | 来源 | 结论 | 本地文件 |
+|------|------|------|------|----------|
+| 2026-09-09 | 2020-12 书面卷 68 题 | jlptzhen 词组 quiz（问题1-4 键+选项文本，`refs/2020-12_vocab_jlptzhen.json`）+ 前途教育 `https://qiantu.xdf.cn/202012/10970010.html`（逐题答案+解析+选项文本,问题6 排列 2,3,1,4等×5,答案句逐句吻合）+ 蔚蓝 `http://jp.weilanliuxue.cn/lxks/jlpt/21250.html`（逐题数字键 读解45-68 全文）+ trynihongo 全文转写 `refs/2020-12_trynihongo.json` | ✅ 键 213414\|4221423\|423213\|124133\|4344132233\|42431(并べ替え,排列逐题 4,2,4,3,1)\|2123\|读解 2311\|412313132\|242\|44\|4321\|33；读解题答案句逐一吻合选项文本；Q58=2（约五亿年前~急增后减少又增加）文本三源核对 weilan=4/qiantu=3 位置均不合文案；Q32=2 対戦してくる 转写位置(shuffle-safe) | `refs/2020-12_key_xdfqiantu.html`（179,560 B 原文存档）+ `refs/2020-12_key_weilan.html` + `refs/2020-12_keys.json` + `refs/2020-12_keyreport.txt` |
+
+- 方法：`tools/keymap.py` 新管线——jlptzhen 键与转写选项**文本匹配**求位置（应对 trynihongo 洗牌），前途页 per-question 文本定位 + 排列/数字兜底；蔚蓝逐题数字与 qiantu 文本在 45-68 全部吻合（除 Q58，文本判断胜出）。
+- 注：问题4 Q24 weilan=4 系笔误（取 3 収容，jlptzhen=qiantu 双源）；问题6 为**并べ替え**题，键 4 2 4 3 1 为该空位序。
+- 结果: `past-exams/2020/12/*/` 68 问；`generate_paper.py` 新增 legacy（trynihongo+keymap keys）输入管线；`organize.py sync` 后 bank = 565 题（加密站点 docs/ 同步重建，Node roundtrip 验证通过）。
