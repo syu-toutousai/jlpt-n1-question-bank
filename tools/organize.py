@@ -107,7 +107,9 @@ def main():
     add_parser.add_argument("--answer", required=True, help="Correct answer")
     add_parser.add_argument("--explanation", help="Explanation")
     
-    # Stats command
+    # Sync command: mirror past-exams into question-bank/by-type
+    sync_parser = subparsers.add_parser("sync", help="Mirror past-exams/ into question-bank/by-type/")
+
     stats_parser = subparsers.add_parser("stats", help="Show statistics")
     
     args = parser.parse_args()
@@ -128,6 +130,20 @@ def main():
         q_id = kb.add_question(question_data)
         print(f"Added question: {q_id}")
     
+    if args.command == "sync":
+        from pathlib import Path as _P
+        n = 0
+        for qf in kb.past_exams.rglob("*.json"):
+            d = json.load(open(qf, encoding="utf-8"))
+            sect = d.get("section", "unknown")
+            typ = d.get("type", "unknown")
+            num = d.get("number", 0)
+            out = kb.question_bank / "by-type" / f"{sect}-{typ}" / f"{typ}_{num:02d}.json"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            n += 1
+        print(f"Synced {n} questions into question-bank/by-type/")
+
     elif args.command == "stats":
         stats = kb.get_statistics()
         print(json.dumps(stats, indent=2, ensure_ascii=False))
