@@ -71,8 +71,17 @@ def split_sent(text: str):
     return out
 
 
-NOTE_RE = re.compile(r"[（(]注[\d０-９]+[）)]")
+NOTE_RE = re.compile(r"[（(]*\s*注[\d０-９]*\s*[）)]")
 CHUURYAKU = re.compile(r"[（(]中略[）)]")
+
+
+def paraphrase_sub(q: str, target: str, ans: str):
+    for c in ("している", "した", "する", "なので", "で", "に", "だ"):
+        if ans.endswith(c) and target and (target + c) in q:
+            return q.replace(target + c, ans, 1)
+    if target and target in q:
+        return q.replace(target, ans, 1)
+    return None
 
 
 def degloss(s: str) -> str:
@@ -206,14 +215,19 @@ def collect(session: str):
                 f = fill_blank(d.get("question") or "",
                                (d.get("options") or [""] * 4)[int(d.get("answer") or 1) - 1])
                 texts += split_sent(f) if f else split_sent(clean(d.get("question") or ""))
-            else:
+            elif kind == "paraphrase":
                 q = clean(d.get("question") or "")
+                ans = (d.get("options") or [""] * 4)[int(d.get("answer") or 1) - 1]
+                target = (d.get("target") or "").strip()
                 texts += split_sent(q)
-                if kind == "usage":
-                    for o in (d.get("options") or []):
-                        s = clean(o)
-                        if has_kana(s) and len(s) >= 4:
-                            texts.append(s)
+                s2 = paraphrase_sub(q, target, ans)
+                if s2 and has_kana(s2):
+                    texts.append(s2)
+            elif kind == "usage":
+                ans = (d.get("options") or [""] * 4)[int(d.get("answer") or 1) - 1]
+                s = clean(ans)
+                if has_kana(s) and len(s) >= 4:
+                    texts.append(s)
         elif sec == "grammar" and kind == "choice":
             f = fill_blank(d.get("question") or "",
                            (d.get("options") or [""] * 4)[int(d.get("answer") or 1) - 1])
