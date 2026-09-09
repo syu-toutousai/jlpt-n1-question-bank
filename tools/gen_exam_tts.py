@@ -213,7 +213,9 @@ def collect(session: str):
         kind, sec = d.get("type"), d.get("section")
         texts = []
         if sec == "vocab":
-            if kind == "context":
+            if kind == "reading":
+                texts += split_sent(clean(d.get("question") or ""))
+            elif kind == "context":
                 f = fill_blank(d.get("question") or "",
                                (d.get("options") or [""] * 4)[int(d.get("answer") or 1) - 1])
                 texts += split_sent(f) if f else split_sent(clean(d.get("question") or ""))
