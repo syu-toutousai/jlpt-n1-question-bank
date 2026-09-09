@@ -45,6 +45,10 @@
 | 2026-09-09 | 2017-12 书面卷 70 题全部密钥（語彙・文法・読解），基于 trynihongo 出题接口逐题「服务器裁决」 | trynihongo.com 過去問 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-12-2017-q739` 的 `check_single_question_ajax` 接口 POST（每选项 `is_correct` 由服务器返回）+ refs/2017-12_key_asite.html（a-site Q1-49 短语锚）+ 帝京 scribd 快照 | ✅ 70/70（語彙 62-位置 1-19 短语定位、問題4-13 由 API 服务器验证位置；排序 Q36-40=1,4,3,2,2 与 a-site ①④③②② 吻合；问题7=41123、问题8=2432 同 a-site 数字） | refs/2017-12_answer_trynihongo.json + refs/2017-12_keys.json（70 题） |
 | 2026-09-09 | 2018-07 书面卷 70 题全部密钥（此前 weilan 51 题数字为官方位、转写已洗牌） | trynihongo 真题页 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-7-2018-q740` 出题接口服务器裁决（每选项 `is_correct`） | ✅ 70/70 转写位置（Q28=3 服裁决，此前 weilan=4/帝京=3 争议就此定案）；键 241243\|4323122\|314312\|423141\|4331221423\|13243\|31241\|2411\|444444211\|1321\|34\|2423\|31 | refs/2018-07_answer_trynihongo.json + refs/2018-07_keys.json（70 题，全量重写） |
 | 2026-09-09 | 2019-12 书面卷 69 题全部密钥（weilan 59 题数字同为官方位） | trynihongo 真题页 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-12-2019-q743` 出题接口服务器裁决 | ✅ 69/69 转写位置（transcript 无 Q70）；文法 26-35=1123323244 与 chuyenngoaingu 官方表逐位一致（该段转写未洗牌） | refs/2019-12_answer_trynihongo.json + refs/2019-12_keys.json（69 题，全量重写） |
+| 2026-09-09 | 2018-12 书面卷 70 题全部密钥 | trynihongo 真题页 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-12-2018-q741` 出题接口服务器裁决 | ✅ 70/70 转写位置 | refs/2018-12_answer_trynihongo.json + refs/2018-12_keys.json（70 题全量重写；generate_paper 用 trynihongo 路径需先临时移开 refs/2018-12_jlpt247.json） |
+| 2026-09-09 | 2019-07 书面卷 69 题全部密钥 | trynihongo 真题页 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-7-2019-q742` 出题接口服务器裁决 | ✅ 69/69 转写位置 | refs/2019-07_answer_trynihongo.json + refs/2019-07_keys.json（69 题全量重写） |
+| 2026-09-09 | 2016-12 书面卷 70 题全部密钥 | trynihongo 真题页 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-12-2016-q737` 出题接口服务器裁决 | ✅ 70/70 转写位置 | refs/2016-12_answer_trynihongo.json + refs/2016-12_keys.json（70 题全量重写） |
+| 2026-09-09 | 2016-07 书面卷 70 题全部密钥 | trynihongo 真题页 `de-thi-jlpt-tu-vung-ngu-phap-doc-hieu-n1-7-2016-q736` 出题接口服务器裁决 | ✅ 70/70 转写位置 | refs/2016-07_answer_trynihongo.json + refs/2016-07_keys.json（70 题全量重写） |
 
 ## 结论标记
 
@@ -127,3 +131,15 @@
 - 方法（与新工具 `tools/trynihongo_api.py` 固化）：真题页 DOM 每盒带 `data-question-id`/`data-answer-id`；按「文档序中真实选项盒」重排为题号（passage 盒会占用同号 id）；per-question 单页 GET 绑定 CSRF token（同 cookie jar），逐选项 POST 直到 `is_correct=true`；3s 间距 + 15s 退避。
 - 背景：此前这 2 场从蔚蓝 weilan 提取的数字键是「官方位」，trynihongo 转写会洗牌选项（语汇 1-19 尤甚），故整场用服务器裁决重做以保证位置对齐。
 - 结果: `past-exams/2018/07/*/` 70 问、`past-exams/2019/12/*/` 69 问；`organize.py sync` 后 bank = 774 题；加密站点重建，Node roundtrip 通过（774 可解密、三场各 70/70/69 在位、错误口令被拒）。
+
+## 2018-12 / 2019-07 / 2016-12 / 2016-07 完整密钥（trynihongo 接口服务器裁决）
+
+| 日期 | 范围 | 来源 | 结论 | 本地文件 |
+|------|------|------|------|----------|
+| 2026-09-09 | 2018-12 书面卷 70 题 | q741 真题页 → `check_single_question_ajax` | ✅ 70/70；注意 generate_paper 检出源顺序为 jlpt247 优先，生成时需临时移开 refs/2018-12_jlpt247.json | refs/2018-12_answer_trynihongo.json（70 条）+ refs/2018-12_keys.json |
+| 2026-09-09 | 2019-07 书面卷 69 题 | q742 真题页同接口 | ✅ 69/69 | refs/2019-07_answer_trynihongo.json + refs/2019-07_keys.json |
+| 2026-09-09 | 2016-12 书面卷 70 题 | q737 真题页同接口 | ✅ 70/70 | refs/2016-12_answer_trynihongo.json + refs/2016-12_keys.json |
+| 2026-09-09 | 2016-07 书面卷 70 题 | q736 真题页同接口 | ✅ 70/70 | refs/2016-07_answer_trynihongo.json + refs/2016-07_keys.json |
+
+- 同 `tools/trynihongo_api.py` 流程（per-question 单页 GET 绑 token → 逐选项 POST 至 `is_correct=true`，3s 间距+15s 退避）。
+- 结果: `past-exams/2018/12/*/` 70 问、`2019/07/*/` 69 问、`2016/12/*/` 70 问、`2016/07/*/` 70 问；`organize.py sync` 后 bank = 1053 题；加密站点重建，Node roundtrip 通过（1053 可解密、七场合计在看、错误口令被拒）。
