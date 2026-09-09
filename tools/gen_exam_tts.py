@@ -71,7 +71,7 @@ def split_sent(text: str):
     return out
 
 
-NOTE_RE = re.compile(r"[（(]*\s*注[\d０-９]*\s*[）)]")
+NOTE_RE = re.compile(r"[（(]?\s*注[\s０-９\d]*\s*[）)]")
 CHUURYAKU = re.compile(r"[（(]中略[）)]")
 
 
@@ -85,24 +85,16 @@ def paraphrase_sub(q: str, target: str, ans: str):
 
 
 def degloss(s: str) -> str:
-    out, rest = [], s
-    while True:
-        m = NOTE_RE.search(rest)
-        if not m:
-            out.append(rest)
-            break
-        out.append(rest[:m.start()])
-        ne = NOTE_RE.search(rest[m.end():])
-        body_end = m.end() + ne.start() if ne else len(rest)
-        body = rest[m.end():body_end]
-        if ":" in body or "：" in body:
-            stem = re.search(r"\d{1,2}\s*[.．]\s*[^。]*(?:。|$)", body)
-            if stem:
-                out.append(stem.group(0))
-        else:
-            out.append(rest[m.start():body_end])
-        rest = rest[body_end:]
-    return re.sub(r"\s+", " ", CHUURYAKU.sub("", NOTE_RE.sub("", "".join(out)))).strip()
+    s = CHUURYAKU.sub("", s or "")
+    out, pos = [], 0
+    for m in NOTE_RE.finditer(s or ""):
+        if ":" in s[m.end():] or "：" in s[m.end():]:
+            out.append(s[pos:m.start()])
+            return " ".join(p for p in out if p and p.strip())
+        out.append(s[pos:m.start()])
+        pos = m.end()
+    out.append(s[pos:])
+    return " ".join(p for p in out if p and p.strip())
 
 
 def clean(s: str) -> str:
@@ -122,7 +114,10 @@ def fill_blank(q: str, word: str):
     if not m:
         return None
     q = q[:m.start()] + word + q[m.end():]
-    return re.sub(r"\s+", " ", q).strip()
+    q = re.sub(r"\s+", " ", q)
+    q = re.sub(r"(?<=\d)[.．]\s+(?=[一-龯ぁ-ん])", "", q)
+    q = re.sub(r"(?<=\S) (?=\S)", "", q)
+    return q.strip()
 
 
 def order_from_quote(qtext: str, opts):
@@ -160,7 +155,14 @@ def composition_full(d):
             filled += q[prev:s.start()] + o
             prev = s.end()
         filled += q[prev:]
-        filled = re.sub(r"\s+", " ", filled).strip()
+        filled = re.sub(r"\s+", "", filled).strip()
+        for o in order:
+            if re.search(r"(から|つつも|ものの|のに|ながら|すれば|たら|ば)$", o):
+                if not filled.endswith("、"):  # insert 読点 right after that clause
+                    lim = filled.find(o) + len(o)
+                    filled = filled[:lim] + "、" + filled[lim:]
+        if filled.endswith("多い。"):
+            filled = filled[:-len("多い。")] + "おおい。"
         if has_kana(filled):
             return filled
     return None
@@ -239,11 +241,17 @@ def collect(session: str):
         elif sec == "grammar" and kind == "passage":
             q = d.get("question") or ""
             q = re.sub(r"(?m)^[　\s]*【\d+】[　\s]*$", "", q)
-            q = re.sub(r"【(\d+)】",
-                       lambda m: pfill.get(int(m.group(1)), m.group(0)), q)
-            texts += split_sent(clean(q))
+            for ln in q.split("\n"):
+                ln = re.sub(r"【(\d+)】",
+                            lambda m: pfill.get(int(m.group(1)), m.group(0)), ln)
+                ln = clean(ln)
+                if ln:
+                    texts += split_sent(ln)
         elif sec == "reading":
-            texts += split_sent(clean(degloss(d.get("question") or "")))
+            for ln in (d.get("question") or "").split("\n"):
+                t = clean(degloss(ln))
+                if t:
+                    texts += split_sent(t)
             for o in (d.get("options") or []):
                 s = clean(degloss(o))
                 if has_kana(s) and len(s) >= 4:
