@@ -54,12 +54,19 @@ FURIGANA_PAIR = re.compile(r"(" + KANJI + r"+)(\([" + "ぁ-ゖァ-ヺー・ゝ�
 SPEAKER_RE = re.compile(r"^[^:：]{1,10}[:：]\s*")
 OPT_NO_RE = re.compile(r"^\d+[.、．．]?\s*")
 
-LISTEN_DESC = {"detailed": "詳細理解", "grammar": "文法応答",
-               "implication": "発話意図", "overview": "適切な発話", "point": "要点理解"}
+# JLPT N1 聴解 問題1〜5 official type names (問題4 即時応答's old name was 発話表現)
+LISTEN_DESC = {"point": "課題理解", "grammar": "ポイント理解",
+               "overview": "概要理解", "detailed": "即時応答", "implication": "統合理解"}
 NONKEY_TAGS = ("言葉の意味", "文脈規定", "文法選択", "文法", "聴解")
 
-SESSIONS = ("2024-07", "2024-12")
-SESSION_DIR = {"2024-07": "2024/07", "2024-12": "2024/12"}
+SESSIONS = (
+    "2010-07", "2010-12", "2011-07", "2011-12", "2012-07", "2012-12",
+    "2013-07", "2013-12", "2014-07", "2014-12", "2015-07", "2015-12",
+    "2016-07", "2016-12", "2017-12", "2018-07", "2018-12", "2019-07",
+    "2019-12", "2020-12", "2021-12", "2022-07", "2022-12", "2023-07",
+    "2024-07", "2024-12", "2025-07",
+)
+SESSION_DIR = {s: f"{s.split('-')[0]}/{s.split('-')[1]}" for s in SESSIONS}
 
 
 def esc(s):

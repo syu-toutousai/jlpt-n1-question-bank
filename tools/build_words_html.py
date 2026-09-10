@@ -51,7 +51,112 @@ BUNRUI = [
     ("toki", "聴解"),
 ]
 
-# Per-session configuration: session_id → {title, materials, answers, sub}
+# ---- auto-config: derive a session's page from analysis/*.md + bank data ----
+AUTO_LABELS = {
+    "vocab-reading-words": ("q1", "問題1 読み方", "漢字語の読み"),
+    "vocab-context-words": ("q2", "問題2 文脈規定", "語を正しく判断"),
+    "paraphrase": ("q3", "問題3 言い換え", "同義表現"),
+    "usage": ("q4", "問題4 使い方", "文を作る"),
+    "grammar-choice": ("q5", "問題5 文法選択", "文型"),
+    "composition": ("q6", "問題6 並べ替え", "並べ替え"),
+    "grammar-passage": ("q7", "問題7 文章の文法", "空欄文型"),
+    "reading-short": ("q8", "問題8 短文読解", "短文読解"),
+    "reading-mid": ("q9", "問題9 中文読解", "中文読解"),
+    "reading-long": ("q10", "問題10 長文読解A", "長文読解A"),
+    "reading-long-b": ("q13", "問題13 長文読解B", "長文読解B"),
+    "listening": ("toki", "聴解", "聴解 全問題"),
+}
+AUTO_SID_SRC = {
+    "q3": ("vocab", ("paraphrase",)),
+    "q4": ("vocab", ("usage",)),
+    "q5": ("grammar", ("choice",)),
+    "q6": ("grammar", ("composition",)),
+    "q7": ("grammar", ("passage",)),
+    "q8": ("reading", ("short",)),
+    "q9": ("reading", ("mid",)),
+    "q10": ("reading", ("long",)),
+}
+
+
+def _bank_min_num(session, subdir, types):
+    y, m = session.split("-")
+    nums = []
+    for f in glob.glob(str(ROOT / "past-exams" / y / m / subdir / "*.json")):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except OSError:
+            continue
+        if d.get("type") in types:
+            try:
+                nums.append(int(d.get("number") or 0))
+            except ValueError:
+                pass
+    return min(nums) if nums else 1
+
+
+def _bank_qdata(session, subdir, types):
+    y, m = session.split("-")
+    out = {}
+    for f in glob.glob(str(ROOT / "past-exams" / y / m / subdir / "*.json")):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except OSError:
+            continue
+        if d.get("type") not in types:
+            continue
+        try:
+            num = int(d.get("number") or 0)
+        except ValueError:
+            continue
+        tgt = (d.get("target") or "").strip()
+        ans = None
+        try:
+            opts = d.get("options") or []
+            ans = opts[int(d["answer"]) - 1]
+        except (KeyError, ValueError, IndexError):
+            pass
+        out[num] = (tgt or ans or "").strip()
+    return out
+
+
+def auto_cfg(session):
+    y, m = session.split("-")
+    materials = []
+    answers = {}
+    for f in sorted(glob.glob(str(ANALYSIS / f"{session}-*.md"))):
+        base = Path(f).name[len(session) + 1:-3]
+        lab = AUTO_LABELS.get(base)
+        if not lab:
+            continue
+        sid, label, sub = lab
+        if sid == "toki":
+            qfirst = 1
+        elif sid in AUTO_SID_SRC:
+            qfirst = _bank_min_num(session, *AUTO_SID_SRC[sid])
+        else:
+            qfirst = 1
+        materials.append({"file": Path(f).name, "sid": sid, "qfirst": qfirst,
+                          "label": label, "sub": sub})
+        if sid in AUTO_SID_SRC:
+            answers[sid] = {k: v for k, v in _bank_qdata(
+                session, *AUTO_SID_SRC[sid]).items() if v}
+    return {"title": f"{y}年{int(m)}月 JLPT N1 語注・例句集",
+            "sub": "語彙・文法・読解・聴解の語注（MOJi辞書）＋ Nadeshiko 动漫日剧真实台词",
+            "materials": materials, "answers": answers}
+
+
+def session_cfg(sid):
+    return SESSIONS[sid] if sid in SESSIONS else auto_cfg(sid)
+
+
+def all_sessions():
+    out = set(SESSIONS)
+    for f in glob.glob(str(ANALYSIS / "[0-9][0-9][0-9][0-9]-[0-9][0-9]-*.md")):
+        out.add(Path(f).name[:7])
+    return sorted(out)
+
+
+# ---- per-session configuration (manually curated for flagship sessions) ----
 SESSIONS = {
     "2024-07": {
         "title": "2024年7月 JLPT N1 語注・例句集",
@@ -626,15 +731,15 @@ import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build vocab-words HTML page")
-    parser.add_argument("--session", choices=list(SESSIONS.keys()),
+    parser.add_argument("--session",
                         help="Build a single session (e.g. 2024-07, 2024-12)")
     parser.add_argument("--all", action="store_true",
-                        help="Build all sessions")
+                        help="Build all sessions with study materials")
     args = parser.parse_args()
 
     sessions_to_build = []
     if args.all:
-        sessions_to_build = list(SESSIONS.keys())
+        sessions_to_build = all_sessions()
     elif args.session:
         sessions_to_build = [args.session]
     else:
@@ -642,7 +747,7 @@ if __name__ == "__main__":
         raise SystemExit(1)
 
     for sid in sessions_to_build:
-        cfg = SESSIONS[sid]
+        cfg = session_cfg(sid)
         out = ROOT / "docs" / (f"vocab-words-{sid}.html" if sid != "2024-07" else "vocab-words.html")
         main(title=cfg["title"], sub=cfg["sub"], materials=cfg["materials"],
              answers=cfg["answers"], out_path=out)

@@ -124,8 +124,37 @@ border-radius:50%;animation:sp 0.7s linear infinite;vertical-align:-2px;margin-r
     <input id="pw" type="password" placeholder="访问密码" autocomplete="off">
     <div class="err" id="err">密码错误，请重新输入</div>
     <button id="unlockBtn">解锁题库</button>
-    <div class="hint"><a href="vocab-words.html" style="color:var(--acc)">📖 公开学习材料：2024年7月 全66問 語注・例句集（免密，含聴解）→</a></div>
-    <div class="hint"><a href="vocab-words-2024-12.html" style="color:var(--acc)">📖 公开学习材料：2024年12月 全66問 語注・例句集（免密）→</a></div>
+    <details class="hint"><summary>📖 公开学习材料：全27场 語注・例句集（免密，语汇/文法/读解/聴解）→</summary>
+      <div style="line-height:1.9">
+        <a href="vocab-words.html" style="color:var(--acc)">2024年7月　全66問・含聴解（基准页）→</a><br>
+        <a href="vocab-words-2025-07.html" style="color:var(--acc)">2025年7月 →</a><br>
+        <a href="vocab-words-2024-12.html" style="color:var(--acc)">2024年12月 →</a><br>
+        <a href="vocab-words-2023-07.html" style="color:var(--acc)">2023年7月 →</a><br>
+        <a href="vocab-words-2022-12.html" style="color:var(--acc)">2022年12月 →</a><br>
+        <a href="vocab-words-2022-07.html" style="color:var(--acc)">2022年7月 →</a><br>
+        <a href="vocab-words-2021-12.html" style="color:var(--acc)">2021年12月 →</a><br>
+        <a href="vocab-words-2020-12.html" style="color:var(--acc)">2020年12月 →</a><br>
+        <a href="vocab-words-2019-12.html" style="color:var(--acc)">2019年12月 →</a><br>
+        <a href="vocab-words-2019-07.html" style="color:var(--acc)">2019年7月 →</a><br>
+        <a href="vocab-words-2018-12.html" style="color:var(--acc)">2018年12月 →</a><br>
+        <a href="vocab-words-2018-07.html" style="color:var(--acc)">2018年7月 →</a><br>
+        <a href="vocab-words-2017-12.html" style="color:var(--acc)">2017年12月 →</a><br>
+        <a href="vocab-words-2016-12.html" style="color:var(--acc)">2016年12月 →</a><br>
+        <a href="vocab-words-2016-07.html" style="color:var(--acc)">2016年7月 →</a><br>
+        <a href="vocab-words-2015-12.html" style="color:var(--acc)">2015年12月 →</a><br>
+        <a href="vocab-words-2015-07.html" style="color:var(--acc)">2015年7月 →</a><br>
+        <a href="vocab-words-2014-12.html" style="color:var(--acc)">2014年12月 →</a><br>
+        <a href="vocab-words-2014-07.html" style="color:var(--acc)">2014年7月 →</a><br>
+        <a href="vocab-words-2013-12.html" style="color:var(--acc)">2013年12月 →</a><br>
+        <a href="vocab-words-2013-07.html" style="color:var(--acc)">2013年7月 →</a><br>
+        <a href="vocab-words-2012-12.html" style="color:var(--acc)">2012年12月 →</a><br>
+        <a href="vocab-words-2012-07.html" style="color:var(--acc)">2012年7月 →</a><br>
+        <a href="vocab-words-2011-12.html" style="color:var(--acc)">2011年12月 →</a><br>
+        <a href="vocab-words-2011-07.html" style="color:var(--acc)">2011年7月 →</a><br>
+        <a href="vocab-words-2010-12.html" style="color:var(--acc)">2010年12月 →</a><br>
+        <a href="vocab-words-2010-07.html" style="color:var(--acc)">2010年7月 →</a>
+      </div>
+    </details>
     <div class="hint">密码见本地 tools/encrypt.py 生成的 site/.secret.txt</div>
   </div>
 </div>
@@ -137,11 +166,12 @@ const TYPEMAP={
  'vocab-reading':'読み方(文字)','vocab-context':'文脈規定(語彙)','vocab-paraphrase':'言い換え','vocab-usage':'語彙用法',
  'grammar-usage':'文脈規定(文法)','grammar-choice':'文法選択','grammar-composition':'文の並べ替え','grammar-passage':'文章の文法',
  'reading-short':'短文読解','reading-mid':'中文読解','reading-long':'長文読解',
- 'listening-point':'課題理解','listening-grammar':'要点理解','listening-overview':'概要理解',
+ 'listening-point':'課題理解','listening-grammar':'ポイント理解','listening-overview':'概要理解',
  'listening-detailed':'即時応答','listening-implication':'統合理解'
 };
 const DIFF={easy:['d0','易'],medium:['d1','中'],hard:['d2','難']};
 const b64toBuf=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0)).buffer;
+const MATPAGE=(y,m)=>'vocab-words'+((y!==2024||m!==7)?('-'+y+'-'+String(m).padStart(2,'0')):'')+'.html';
 
 const $=id=>document.getElementById(id);
 let QUESTIONS=[];
@@ -253,7 +283,7 @@ function card(q,idx){
     || (q.section==='grammar' && num>=26&&num<=44)
     || (q.section==='reading' && num>=45&&num<=66)
     || (q.section==='listening' && q.year===2024&&q.month===7));
-  const matPage= (q.year===2024 && q.month===12)?'vocab-words-2024-12.html':'vocab-words.html';
+  const matPage=MATPAGE(q.year,q.month);
   const ext= hasExt?`<a class="ext" href="${matPage}#${q.section==='listening'?listenTag(q):'q'+num}" target="_blank" title="跳转到对应小问的学习材料">📖 扩展</a>`:'';
   const opts=(q.options||['','','','']).map((o,i)=>
     `<div class="opt" data-i="${i}" data-ok="${ansIndex(q.answer)===i?1:0}">`+
@@ -299,7 +329,7 @@ function targetHtml(text,target,link,q){
   const t=escapeHtml(target);
   const r=new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
   if(link){
-    const matPage=(q&&q.year===2024&&q.month===12)?'vocab-words-2024-12.html':'vocab-words.html';
+    const matPage=(q&&q.year)?MATPAGE(q.year,q.month):'vocab-words.html';
     return s.replace(r, `<a class="extw" href="${matPage}#w-${encodeURIComponent(target)}" target="_blank" title="查看词条卡片"><u>${t}</u></a>`);
   }
   return s.replace(r, `<u>${t}</u>`);

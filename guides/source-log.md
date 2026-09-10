@@ -164,3 +164,16 @@
 - 工具 `tools/trynihongo_api.py` 修正：选项窗口 6000→20000 字节（2011-12 Q69 第 4 选项 川村さん 因 passage 超长图片被截断；修正后 = ④）。
 - 至此可及场次（2010-07～2019-12 三轮、2020-12、2021-12、2022 两场、2023-07、2024 两场、2025-07）书面卷答案全部齐备；2020-07 当年停考，2023-12 / 2025-12（及 2026 年）无真题来源。
 - 结果: `organize.py sync` 后 bank = 1895 题；docs/ 重建；Node roundtrip 通过（1895 可解密、按年份 2010:142 … 2025:66、错误口令被拒）。
+
+## 学习材料全量重产：全27场 語注・例句集 + 聴解
+
+| 日期 | 范围 | 来源 | 结论 | 本地文件 |
+|------|------|------|------|----------|
+| 2026-09-10 | 2010-07～2025-07 全部 27 场 | tools/gen_learn_md.py（MOJi 辞书 + Nadeshiko 动漫日剧台词 + edge-tts） | 每场生成 9 个 md（q3 言い換え/q4 使い方/q5 文法選択/q6 並べ替え/q7 文章文法/q8-q10 読解/聴解）；建 docs/vocab-words-<session>.html 27 页；docs/index.html 免密列表 + 每页链接 | analysis/<session>-\*.md（243 个）+ docs/vocab-words-\*.html |
+
+- gen_learn_md.SESSIONS 扩至 27 场；enrich 走磁盘缓存 tools/data/learn_cache.json（本次增补约 2300 词条调度，全部落缓存）。
+- 聴解五类官方型名统一为：問題1 課題理解 / 問題2 ポイント理解 / 問題3 概要理解 / 問題4 即時応答（旧称 発話表現）/ 問題5 統合理解；修正 gen_learn_md.LISTEN_DESC、docs/index.html TYPEMAP、docs/vocab-words*.html 全部聴解小节标题。
+- 旧场次（2010-2019 老格式）聴解问答脚本受 trynihongo 登录墙限制 → 聴解材料仅含题干・选项・音频链接，无原文翻译（2010-07 起）；2024-12 / 2025-07 无聴解文件（该两场收听页缺省/未采）。
+- 2024-07 保持基准页 docs/vocab-words.html 命名（免密全66問・含聴解）；其余 26 场 = vocab-words-<session>.html。
+- 注意：旧格式笔试 q1/q2（読方/語彙）无独立材料文件（既有生成器未覆盖老格式），页面仅 nav 置灰。
+- 本次构建中途曾触发 /home 磁盘满（100%），清理 yay/pacman/pip/uv/chrome 缓存（~7G，pacman 包缓存为 root 属主未能删）后方继续。
