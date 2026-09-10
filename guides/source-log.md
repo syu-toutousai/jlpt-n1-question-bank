@@ -145,6 +145,16 @@
 - 同 `tools/trynihongo_api.py` 流程（per-question 单页 GET 绑 token → 逐选项 POST 至 `is_correct=true`，3s 间距+15s 退避）。
 - 结果: `past-exams/2018/12/*/` 70 问、`2019/07/*/` 69 问、`2016/12/*/` 70 问、`2016/07/*/` 70 问；`organize.py sync` 后 bank = 1053 题；加密站点重建，Node roundtrip 通过（1053 可解密、七场合计在看、错误口令被拒）。
 
+## 聴解（听力）近十年全量入库（2026-09-10）
+
+| 日期 | 范围 | 来源 URL | 校对结论 | 本地文件 (refs/) |
+|------|------|----------|----------|------------------|
+| 2026-09-10 | 2010-07 … 2023-07 二十四场聴解（旧式 35-38 题/新式 30 题，共 851 题） | https://trynihongo.com/en/de-thi-jlpt-nghe-n1-thang-{07|12}-nam-{YYYY}-qNNN（馆内嵌 quizContext：题干=问题番号、音频源、每选项 fraction） | ✅ 答案 = 页面内嵌 fraction=1 的位置；每问含音频 URL（trynihongo /upload/mooddata/…，直链可达）；站方对话脚本需登录，暂缺 | refs/<session>_listening_page.html + refs/<session>_listening_trynihongo.json（基于正文 quizContext 归纳：「問題N」含空格/罗马数字/聴解①②等多种节标题统一为問題1-5；问题5 の質問1/2 无独立音频，继承3番故事音频） |
+| 2026-09-10 | 2024-12 聴解 | https://trynihongo.com/en/de-thi-jlpt-nghe-n1-thang-12-nam-2024-q1356 | ⚠️ 页面仅存 quiz 元数据、无题目，判为 stub，未采集 | refs/2024-12_listening_page.html（已留档备查） |
+
+- 工具 `tools/fetch_listening.py`（quizContext 解析、节标题归一、音频继承）+ `tools/generate_paper.py` 追加 `refs/<session>_listening_trynihongo.json` 合并写入 `past-exams/<y>/<m>/listening/`（type=point/grammar/overview/detailed/implication）。
+- 结果（在既有 2024-07 jlptzhen 30 道聴解之上）：`organize.py sync` 后 bank = 2746 题（其中聴解 881）；docs/ 重建；Node roundtrip 通过（2746 可解密、851 道聴解带音频 URL、错误口令被拒）。
+
 ## 2010-07～2015-12 十二场完整密钥（trynihongo 接口服务器裁决，全量收官）
 
 | 日期 | 范围 | 来源 | 结论 | 本地文件 |

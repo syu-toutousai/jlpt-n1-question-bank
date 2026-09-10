@@ -425,6 +425,11 @@ def main():
         legacy_keys = json.load(open(keys_path, encoding="utf-8"))
     refs_tag = ref.name
     data = json.load(open(ref, encoding="utf-8"))
+    listen_ref = REFS / f"{session}_listening_trynihongo.json"
+    if listen_ref.exists():
+        extra = json.load(open(listen_ref, encoding="utf-8"))
+        data = dict(data)
+        data["questions"] = list(data.get("questions", [])) + list(extra["questions"])
     off = section_offsets()
     listen_sects = {f"問題{i}" for i in LISTEN_TYPE}
     summary = {"written": 0, "skipped": 0, "files": [], "skip_list": [], "warns": []}
