@@ -20,3 +20,6 @@
 - 加密站点更新至 162 题并推送（docs/，明文永不入库）
 - 常用漢字表 底表 2136字（`data/joyo-kanji-2136.json`，2024-09-08）
 - 常用漢字表 注訳 PDF を全问题バンク化（2024-07+2024-12 全162問、語・文・読・聴バッジ＋聴解原文、`index.html#q=…` deep-link、表外付録 23 字）→ `joyokanjihyo-annotated`
+- 呼応・搭配 真题主题索引：全 27 场 270 文法選択 + 135 並べ替え 汇总为 `analysis/呼応-collocations.md`（A 仮定譲歩 / B 全面否定 / C 推量様態 / D 強調程度 / E 文末モダリティ / F 助詞系文型，含出处·答案·未收录备考点）
+- 文法 532 问答案复核（`analysis/呼応-verification.md`）：454 可比对题 453 一致；唯一分歧 2024-07 Q29 判定题库 3 为是
+- 呼応・搭配 → 交互课件：`japanese-learning/koou-courseware/`（167 パターン × 6 類型、532 問真題全量、405 問真题填空题库、270 TTS + 126 Nadeshiko 原声，数据由 `extract_bank.py` 从本库抽取）

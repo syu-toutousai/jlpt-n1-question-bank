@@ -177,3 +177,12 @@
 - 2024-07 保持基准页 docs/vocab-words.html 命名（免密全66問・含聴解）；其余 26 场 = vocab-words-<session>.html。
 - 注意：旧格式笔试 q1/q2（読方/語彙）无独立材料文件（既有生成器未覆盖老格式），页面仅 nav 置灰。
 - 本次构建中途曾触发 /home 磁盘满（100%），清理 yay/pacman/pip/uv/chrome 缓存（~7G，pacman 包缓存为 root 属主未能删）后方继续。
+
+## 呼応・搭配 索引与课件（答案复核 + 真題再编）
+
+| 日期 | 范围 | 来源 | 校对结论 | 本地文件 |
+|------|------|------|----------|----------|
+| 2026-09-12 | 文法 532 问（問題5/6/7，2010-07～2025-07） | refs/<session>_keys.json（trynihongo）· <session>_answerkey_nbry.html · 2024-07_answerkey_diliushixian.md · 题库 verified.note | ✅ 454 可比对题中 453 一致；唯一分歧 2024-07 Q29（第六时限=2 vs jlptzhen/jlpt247=3）判定题库 3 为是 | analysis/呼応-verification.md · analysis/呼応-collocations.md |
+
+- 产出 `analysis/呼応-collocations.md`（按 A 仮定譲歩 / B 全面否定 / C 推量様態 / D 強調程度 / E 文末モダリティ / F 助詞系文型 分类的真题搭配索引）。
+- 据此在姊妹仓库 `japanese-learning/koou-courseware/` 生成单文件交互课件（167 パターン・532 問真題全量・405 問真题填空题库・270 TTS + 126 Nadeshiko 原声），数据由 `extract_bank.py` 从本库抽取。
