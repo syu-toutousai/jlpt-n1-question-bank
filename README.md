@@ -1,5 +1,11 @@
 # JLPT N1 Question Bank (日本語能力試験 N1 問題集)
 
+> ⚠️ **已合并（2026-10）**：本仓库的题库、工具与全部 git 历史已并入
+> [`jlpt-question-bank`](https://github.com/syu-toutousai/jlpt-question-bank) 的 **`n1/` 子树**。
+> **唯一 Pages 入口**：<https://syu-toutousai.github.io/jlpt-question-bank/>（N1–N5 合并单站，一个密码门）。
+> 本站（jlpt-n1-question-bank Pages）现已改为**跳转卡**；原 `vocab-words*.html` 深链以跳转页保留。
+> 新任务请到合并仓库进行，本仓库仅作历史存档。
+
 Comprehensive question bank for JLPT N1 exam preparation, with past exam questions organized by type, year, and theme.
 
 ## Mission (repo定位)
@@ -107,7 +113,11 @@ ls question-bank/by-theme/grammar/
 
 ## GitHub Pages (加密展示)
 
-站点：https://syu-toutousai.github.io/jlpt-n1-question-bank/
+> 2026-10 起：本站已改为**跳转卡**，题库内容统一在
+> <https://syu-toutousai.github.io/jlpt-question-bank/> （N1–N5 合并站）。
+> `docs/` 仅保留 `index.html`（跳转卡）与 27 个 `vocab-words*.html`（深链跳转页）。
+
+旧站点：https://syu-toutousai.github.io/jlpt-n1-question-bank/
 
 **版权保护方案**（客户端 AES 加密）：
 - 明文题目 JSON **仅存本地**（已被 `.gitignore` 忽略，永不入库）
